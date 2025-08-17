@@ -1,10 +1,17 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit"
-  },
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.tabSize": 2,
-  "css.lint.unknownAtRules": "ignore"
+
+  // ✅ Prettier를 기본 포맷터로 지정
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // ✅ 저장 시 Prettier 포맷팅 실행
+  "editor.formatOnSave": true,
+
+  // ✅ 저장 시 ESLint 자동 수정 기능 활성화
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  "css.lint.unknownAtRules": "ignore",
 }
