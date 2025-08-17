@@ -6,6 +6,10 @@ import logoImage from '../../public/logo.png';
 import NavLink from './NavLink';
 
 import { ThemeToggle } from '../theme/ThemeToggle';
+import { useAuthStore } from '@/lib/store/auth.store';
+
+import { LoginDialog } from '../auth/LoginDialog';
+import { LogoutDialog } from '../auth/LogoutDialog';
 
 const navItems = [
   { href: '/', text: '홈' },
@@ -14,6 +18,8 @@ const navItems = [
 ];
 
 export default function Header() {
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+
   return (
     <header className="bg-background/70 sticky top-0 z-50 border-b backdrop-blur-lg">
       <div className="container flex h-[var(--header-height)] items-center px-4">
@@ -42,6 +48,8 @@ export default function Header() {
 
           {/* 토글 및 로그인 관련 */}
           <div className="flex items-center justify-end gap-2">
+            {/* 로그인 상태에 따른, 버튼 관리 */}
+            {isLoggedIn ? <LogoutDialog /> : <LoginDialog />}
             <ThemeToggle />
           </div>
         </div>

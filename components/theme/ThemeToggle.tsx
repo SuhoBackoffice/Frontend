@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  // (팁) 삼항 연산자를 사용하면 코드를 더 간결하게 만들 수 있습니다.
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
