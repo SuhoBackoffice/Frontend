@@ -33,6 +33,7 @@ export default function Header() {
                 fill
                 style={{ objectFit: 'contain' }}
                 priority
+                sizes="160px"
               />
             </Link>
           </div>
