@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +20,7 @@ import { LogOut, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function LogoutDialog() {
+  const router = useRouter();
   const { logout } = useAuthStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -28,6 +30,7 @@ export function LogoutDialog() {
       const response = await postLogout();
       logout();
       toast.success(response.message);
+      router.push('/');
     } catch {
       toast.error('로그아웃에 실패했습니다.', {
         description: '잠시 후 다시 시도해주시거나, 문제가 지속될 경우 관리자에게 문의해주세요.',
