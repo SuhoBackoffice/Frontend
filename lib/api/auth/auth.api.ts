@@ -12,3 +12,13 @@ export async function postLogin(data: LoginRequest): Promise<ApiResponse<null>> 
     },
   });
 }
+
+export async function postLogout(): Promise<ApiResponse<null>> {
+  return fetchApi<null>('/auth/logout', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}

@@ -16,6 +16,7 @@ import {
 import { loginAction, LoginFormState } from '@/lib/action/auth.action'; // LoginFormState도 import
 import { useAuthStore } from '@/lib/store/auth.store';
 import { LogIn, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const initialState: LoginFormState = {
   message: '',
@@ -34,15 +35,16 @@ export function LoginDialog() {
 
   useEffect(() => {
     if (state.success) {
+      toast.success(state.message);
       setLoggedIn(true);
       setIsOpen(false);
     }
-  }, [state.success, setLoggedIn]);
+  }, [state.success, state.message, setLoggedIn, setIsOpen]);
 
   return (
     <>
       <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)} aria-label="로그인">
-        <LogIn className="h-5 w-5" />
+        <LogIn className="h-5 w-5 scale-150" />
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[425px]">
