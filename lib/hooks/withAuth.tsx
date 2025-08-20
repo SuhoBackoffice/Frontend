@@ -25,8 +25,8 @@ export function withAuth<P extends object>(
       }
 
       if (!user || !allowedRoles.includes(user.role)) {
+        router.replace('/');
         toast.error('이 페이지에 접근할 권한이 없습니다.');
-        router.back();
         return;
       }
     }, [_hasHydrated, isLoggedIn, user, router]);
