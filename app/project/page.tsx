@@ -410,7 +410,9 @@ function ProjectPage() {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        !projectData.first && handlePageChange(projectData.pageNo - 1);
+                        if (!projectData.first) {
+                          handlePageChange(projectData.pageNo - 1);
+                        }
                       }}
                       className={projectData.first ? 'pointer-events-none opacity-50' : ''}
                     />
@@ -435,7 +437,9 @@ function ProjectPage() {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        !projectData.last && handlePageChange(projectData.pageNo + 1);
+                        if (!projectData.last) {
+                          handlePageChange(projectData.pageNo + 1);
+                        }
                       }}
                       className={projectData.last ? 'pointer-events-none opacity-50' : ''}
                     />
