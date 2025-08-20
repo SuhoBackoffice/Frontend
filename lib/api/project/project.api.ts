@@ -20,7 +20,7 @@ export async function postNewProject(data: NewProjectRequest): Promise<ApiRespon
 
 export async function getProjectSearchSort(): Promise<ApiResponse<ProjectSearchSortResponse[]>> {
   return fetchApi<ProjectSearchSortResponse[]>('/project/sort-type', {
-    method: 'POST',
+    method: 'GET',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
