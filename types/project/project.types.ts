@@ -5,3 +5,8 @@ export interface NewProjectRequest {
   startDate: string;
   endDate: string;
 }
+
+export interface ProjectSearchSortRequest {
+  id: string;
+  name: string;
+}
