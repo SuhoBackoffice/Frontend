@@ -24,6 +24,7 @@ export interface ProjectSearchSortResponse {
 }
 
 export interface ProjectInfoResponse {
+  id: number;
   version: string;
   region: string;
   name: string;
