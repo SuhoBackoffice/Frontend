@@ -4,7 +4,7 @@ import { withAuth } from '@/lib/hooks/withAuth';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { CalendarIcon, ChevronsUpDown, Check, Search, RotateCcw, Minus } from 'lucide-react';
+import { CalendarIcon, ChevronsUpDown, Check, Search, RotateCcw, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -263,7 +263,7 @@ function ProjectPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-[auto_auto_auto_1fr] gap-6">
+          <div className="grid grid-cols-[auto_auto_auto_1fr] items-center gap-6">
             {/* 시작일 선택 */}
             <div className="space-y-2">
               <Popover>
@@ -299,7 +299,7 @@ function ProjectPage() {
               </Popover>
             </div>
 
-            <Minus className="text-muted-foreground h-5 w-5" />
+            <ArrowRight className="text-muted-foreground h-5 w-5 scale-150" />
 
             {/* 종료일 선택 */}
             <div className="space-y-2">
