@@ -32,7 +32,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex min-h-screen flex-col">
             <Header />
-            <Toaster position="bottom-right" expand={true} richColors />
+            <Toaster position="top-right" expand={true} richColors />
             <main className="container flex-1">{children}</main>
             <Footer />
           </div>
