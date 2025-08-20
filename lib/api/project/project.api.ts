@@ -1,6 +1,11 @@
 import { fetchApi } from '../api-client';
-import { ApiResponse } from '@/types/api.types';
-import { NewProjectRequest, ProjectSearchSortRequest } from '@/types/project/project.types';
+import { ApiResponse, PagingResponse } from '@/types/api.types';
+import {
+  NewProjectRequest,
+  ProjectSearchSortResponse,
+  GetProjectListRequest,
+  ProjectInfoResponse,
+} from '@/types/project/project.types';
 
 export async function postNewProject(data: NewProjectRequest): Promise<ApiResponse<null>> {
   return fetchApi<null>('/project/new', {
@@ -13,9 +18,32 @@ export async function postNewProject(data: NewProjectRequest): Promise<ApiRespon
   });
 }
 
-export async function getProjectSearchSort(): Promise<ApiResponse<ProjectSearchSortRequest[]>> {
-  return fetchApi<ProjectSearchSortRequest[]>('/project/sort-type', {
+export async function getProjectSearchSort(): Promise<ApiResponse<ProjectSearchSortResponse[]>> {
+  return fetchApi<ProjectSearchSortResponse[]>('/project/sort-type', {
     method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function getProjectList(
+  params: GetProjectListRequest
+): Promise<ApiResponse<PagingResponse<ProjectInfoResponse>>> {
+  const queryParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      queryParams.append(key, String(value));
+    }
+  });
+
+  const queryString = queryParams.toString();
+  const url = `/project${queryString ? `?${queryString}` : ''}`;
+
+  return fetchApi<PagingResponse<ProjectInfoResponse>>(url, {
+    method: 'GET',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
