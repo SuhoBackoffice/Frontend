@@ -133,6 +133,10 @@ function ProjectPage() {
     }
   }, []);
 
+  useEffect(() => {
+    handleSearch(initialSearchParams);
+  }, [handleSearch]);
+
   const onSearchClick = () => {
     handleSearch({ ...searchParams, page: 0 });
   };
@@ -140,6 +144,7 @@ function ProjectPage() {
   const onResetClick = () => {
     setSearchParams(initialSearchParams);
     setProjectData(null);
+    handleSearch(initialSearchParams);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -153,7 +158,7 @@ function ProjectPage() {
   };
 
   const getSelectedVersionName = () => versions.find((v) => v.id === searchParams.versionId)?.name;
-  const getSelectedSortName = () => sortOptions.find((s) => s.id === searchParams.sort)?.name; // 로직 변경
+  const getSelectedSortName = () => sortOptions.find((s) => s.id === searchParams.sort)?.name;
 
   return (
     <div className="container mx-auto space-y-4 p-4 md:p-8">
