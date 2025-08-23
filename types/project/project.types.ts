@@ -45,7 +45,7 @@ export interface ProjecInfoDetailResponse {
 }
 
 export interface ProjectInfoBranchResponse {
-  id: number;
+  branchRailId: number;
   branchCode: string;
   branchVersion: string;
   totalQuantity: number;

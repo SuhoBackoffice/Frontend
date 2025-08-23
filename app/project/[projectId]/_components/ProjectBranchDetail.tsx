@@ -23,20 +23,19 @@ export default function ProjectBranchDetail({ promiseData }: ProjectBranchProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Branch 정보</CardTitle>
+        <CardTitle>분기레일</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>분기 코드</TableHead>
-              <TableHead>분기 버전</TableHead>
-              <TableHead className="text-right">총 수량</TableHead>
-              <TableHead className="text-right">완료 수량</TableHead>
-              <TableHead className="text-right">진행률</TableHead>
+        <Table className="border text-sm [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">
+          <TableHeader className="border-b">
+            <TableRow className="divide-x">
+              <TableHead className="text-center">분기 코드</TableHead>
+              <TableHead className="text-center">총 수량</TableHead>
+              <TableHead className="text-center">완료 수량</TableHead>
+              <TableHead className="text-center">진행률</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="divide-y">
             {data && data.length > 0 ? (
               data.map((branch) => {
                 const progress =
@@ -44,18 +43,17 @@ export default function ProjectBranchDetail({ promiseData }: ProjectBranchProps)
                     ? ((branch.completedQuantity / branch.totalQuantity) * 100).toFixed(1)
                     : 0;
                 return (
-                  <TableRow key={branch.id}>
-                    <TableCell className="font-medium">{branch.branchCode}</TableCell>
-                    <TableCell>{branch.branchVersion}</TableCell>
-                    <TableCell className="text-right">{branch.totalQuantity}</TableCell>
-                    <TableCell className="text-right">{branch.completedQuantity}</TableCell>
-                    <TableCell className="text-right">{progress}%</TableCell>
+                  <TableRow key={branch.branchRailId} className="divide-x">
+                    <TableCell className="text-center font-medium">{branch.branchCode}</TableCell>
+                    <TableCell className="text-center">{branch.totalQuantity}</TableCell>
+                    <TableCell className="text-center">{branch.completedQuantity}</TableCell>
+                    <TableCell className="text-center">{progress}%</TableCell>
                   </TableRow>
                 );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={4} className="h-24 text-center">
                   Branch 정보가 없습니다.
                 </TableCell>
               </TableRow>

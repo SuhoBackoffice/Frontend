@@ -87,7 +87,7 @@ export async function getProjectBranchDetail(
   params: GetProjectDetailRequest
 ): Promise<ApiResponse<ProjectInfoBranchResponse[]>> {
   const { projectId } = params;
-  return fetchApi<ProjectInfoBranchResponse[]>(`/project/${projectId}/straight`, {
+  return fetchApi<ProjectInfoBranchResponse[]>(`/project/${projectId}/branch`, {
     method: 'GET',
     credentials: 'include',
     headers: {

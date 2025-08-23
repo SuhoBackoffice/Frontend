@@ -15,7 +15,7 @@ export default function ProjectInfoDetail({ promiseData }: ProjectDetailProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{data.name}</CardTitle>
+        <CardTitle>프로젝트 명 : {data.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
