@@ -17,6 +17,10 @@ export interface GetProjectListRequest {
   sort?: string;
 }
 
+export interface GetProjectDetailRequest {
+  projectId: number;
+}
+
 // 응답
 export interface ProjectSearchSortResponse {
   id: string;
@@ -30,4 +34,39 @@ export interface ProjectInfoResponse {
   name: string;
   startDate: string;
   endDate: string;
+}
+
+export interface ProjecInfoDetailResponse {
+  version: string;
+  region: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface ProjectInfoBranchResponse {
+  id: number;
+  branchCode: string;
+  branchVersion: string;
+  totalQuantity: number;
+  completedQuantity: number;
+}
+
+export interface ProjectInfoStraightResponse {
+  straightRailId: number;
+  length: number;
+  isLoopRail: boolean;
+  straightType: string;
+  totalQuantity: number;
+  litzInfo: LitzWireSupportInfo;
+  holePosition: number;
+}
+
+export interface LitzWireSupportInfo {
+  litz1: number;
+  litz2: number;
+  litz3: number;
+  litz4: number;
+  litz5: number;
+  litz6: number;
 }
