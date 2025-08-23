@@ -4,9 +4,30 @@ import { ApiResponse, ApiError } from '@/types/api.types';
 
 export async function fetchApi<T>(
   endpoint: string,
-  options?: RequestInit
+  options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options });
+  const headers = new Headers(options.headers);
+
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  if (typeof window === 'undefined') {
+    const { cookies } = await import('next/headers');
+    const cookieStore = cookies();
+    const cookieString = cookieStore.toString();
+    if (cookieString) {
+      headers.set('Cookie', cookieString);
+    }
+  }
+
+  const finalOptions: RequestInit = {
+    ...options,
+    headers: headers,
+    credentials: 'include',
+  };
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, finalOptions);
 
   if (response.ok) {
     return response.json() as Promise<ApiResponse<T>>;
