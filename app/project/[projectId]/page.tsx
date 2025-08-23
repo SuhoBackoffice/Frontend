@@ -32,7 +32,7 @@ export default async function ProjectDetail({ params }: { params: Params }) {
   const projectBranchDetailPromise = getProjectBranchDetail({ projectId: id });
 
   return (
-    <AuthGuard allowedRoles={['admin', '관리자']}>
+    <AuthGuard allowedRoles={['admin', '관리자', '사용자']}>
       <div className="container mx-auto space-y-6 p-4 md:p-8">
         {/* 섹션 1: 기본 정보 */}
         <Suspense fallback={<ProjectInfoDetailLoading />}>

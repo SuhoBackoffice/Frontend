@@ -1,6 +1,5 @@
 'use client';
 
-import { withAuth } from '@/lib/hooks/withAuth';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -46,6 +45,7 @@ import {
 } from '@/types/project/project.types';
 import { VersionInfoResponse } from '@/types/version/version.types';
 import { ApiError, PagingResponse } from '@/types/api.types';
+import AuthGuard from '@/components/auth/AuthGuard';
 
 const initialSearchParams: GetProjectListRequest = {
   page: 0,
@@ -57,7 +57,7 @@ const initialSearchParams: GetProjectListRequest = {
   sort: 'START_DATE',
 };
 
-function ProjectPage() {
+export default function ProjectPage() {
   const [searchParams, setSearchParams] = useState<GetProjectListRequest>(initialSearchParams);
   const [projectData, setProjectData] = useState<PagingResponse<ProjectInfoResponse> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -161,302 +161,306 @@ function ProjectPage() {
   const getSelectedSortName = () => sortOptions.find((s) => s.id === searchParams.sort)?.name;
 
   return (
-    <div className="container mx-auto space-y-4 p-4 md:p-8">
-      <h1 className="text-3xl font-bold tracking-tight">프로젝트 조회</h1>
+    <AuthGuard allowedRoles={['admin', '관리자', '사용자']}>
+      <div className="container mx-auto space-y-4 p-4 md:p-8">
+        <h1 className="text-3xl font-bold tracking-tight">프로젝트 조회</h1>
 
-      {/* 검색 필터 섹션 */}
-      <Card>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-[1fr_150px_150px] gap-6">
-            {/* 키워드 입력 */}
-            <div className="space-y-2">
-              <Input
-                id="keyword"
-                placeholder="프로젝트명, 지역 등 검색어를 입력하세요."
-                value={searchParams.keyword}
-                onChange={(e) => setSearchParams({ ...searchParams, keyword: e.target.value })}
-              />
+        {/* 검색 필터 섹션 */}
+        <Card>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-[1fr_150px_150px] gap-6">
+              {/* 키워드 입력 */}
+              <div className="space-y-2">
+                <Input
+                  id="keyword"
+                  placeholder="프로젝트명, 지역 등 검색어를 입력하세요."
+                  value={searchParams.keyword}
+                  onChange={(e) => setSearchParams({ ...searchParams, keyword: e.target.value })}
+                />
+              </div>
+
+              {/* 버전 정보 Combobox */}
+              <div className="space-y-2">
+                <Popover open={versionPopoverOpen} onOpenChange={setVersionPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className="w-full justify-between font-normal"
+                    >
+                      {searchParams.versionId ? getSelectedVersionName() : '버전 선택'}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <Command>
+                      <CommandInput placeholder="버전 검색..." />
+                      <CommandList>
+                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                        <CommandGroup>
+                          {versions.map((version) => (
+                            <CommandItem
+                              key={version.id}
+                              value={version.name}
+                              onSelect={() => {
+                                setSearchParams({ ...searchParams, versionId: version.id });
+                                setVersionPopoverOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  'mr-2 h-4 w-4',
+                                  searchParams.versionId === version.id
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
+                                )}
+                              />
+                              {version.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* 정렬 기준 Combobox */}
+              <div className="space-y-2">
+                <Popover open={sortPopoverOpen} onOpenChange={setSortPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className="w-full justify-between font-normal"
+                    >
+                      {getSelectedSortName() || '정렬 기준 선택'}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <Command>
+                      <CommandList>
+                        <CommandGroup>
+                          {sortOptions.map((option) => (
+                            <CommandItem
+                              key={option.id}
+                              value={option.name}
+                              onSelect={() => {
+                                setSearchParams({
+                                  ...searchParams,
+                                  sort: option.id as 'START_DATE' | 'END_DATE',
+                                });
+                                setSortPopoverOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  'mr-2 h-4 w-4',
+                                  searchParams.sort === option.id ? 'opacity-100' : 'opacity-0'
+                                )}
+                              />
+                              {option.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
-            {/* 버전 정보 Combobox */}
-            <div className="space-y-2">
-              <Popover open={versionPopoverOpen} onOpenChange={setVersionPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between font-normal"
-                  >
-                    {searchParams.versionId ? getSelectedVersionName() : '버전 선택'}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                  <Command>
-                    <CommandInput placeholder="버전 검색..." />
-                    <CommandList>
-                      <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                      <CommandGroup>
-                        {versions.map((version) => (
-                          <CommandItem
-                            key={version.id}
-                            value={version.name}
-                            onSelect={() => {
-                              setSearchParams({ ...searchParams, versionId: version.id });
-                              setVersionPopoverOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                searchParams.versionId === version.id ? 'opacity-100' : 'opacity-0'
-                              )}
-                            />
-                            {version.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* 정렬 기준 Combobox */}
-            <div className="space-y-2">
-              <Popover open={sortPopoverOpen} onOpenChange={setSortPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between font-normal"
-                  >
-                    {getSelectedSortName() || '정렬 기준 선택'}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                  <Command>
-                    <CommandList>
-                      <CommandGroup>
-                        {sortOptions.map((option) => (
-                          <CommandItem
-                            key={option.id}
-                            value={option.name}
-                            onSelect={() => {
-                              setSearchParams({
-                                ...searchParams,
-                                sort: option.id as 'START_DATE' | 'END_DATE',
-                              });
-                              setSortPopoverOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                searchParams.sort === option.id ? 'opacity-100' : 'opacity-0'
-                              )}
-                            />
-                            {option.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-[auto_auto_auto_1fr] items-center gap-6">
-            {/* 시작일 선택 */}
-            <div className="space-y-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !searchParams.startDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {searchParams.startDate ? (
-                      format(searchParams.startDate, 'yyyy-MM-dd')
-                    ) : (
-                      <span>시작일</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={searchParams.startDate ? new Date(searchParams.startDate) : undefined}
-                    onSelect={(date) =>
-                      setSearchParams({
-                        ...searchParams,
-                        startDate: date ? format(date, 'yyyy-MM-dd') : undefined,
-                      })
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <ArrowRight className="text-muted-foreground h-5 w-5 scale-150" />
-
-            {/* 종료일 선택 */}
-            <div className="space-y-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !searchParams.endDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {searchParams.endDate ? (
-                      format(searchParams.endDate, 'yyyy-MM-dd')
-                    ) : (
-                      <span>종료일</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={searchParams.endDate ? new Date(searchParams.endDate) : undefined}
-                    onSelect={(date) =>
-                      setSearchParams({
-                        ...searchParams,
-                        endDate: date ? format(date, 'yyyy-MM-dd') : undefined,
-                      })
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={onResetClick}>
-                <RotateCcw className="mr-2 h-4 w-4" />
-                초기화
-              </Button>
-              <Button onClick={onSearchClick} disabled={isLoading}>
-                <Search className="mr-2 h-4 w-4" />
-                {isLoading ? '검색 중...' : '검색'}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 결과 테이블 섹션 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>검색 결과</CardTitle>
-          {projectData && (
-            <p className="text-muted-foreground text-sm">총 {projectData.totalElements}개</p>
-          )}
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[120px]">버전</TableHead>
-                <TableHead className="w-[120px]">지역</TableHead>
-                <TableHead>프로젝트명</TableHead>
-                <TableHead className="w-[150px]">시작일</TableHead>
-                <TableHead className="w-[150px]">종료일</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    데이터를 불러오는 중입니다...
-                  </TableCell>
-                </TableRow>
-              ) : projectData?.content && projectData.content.length > 0 ? (
-                projectData.content.map((project, index) => (
-                  <TableRow
-                    key={index}
-                    className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => handleRowClick(project.id)}
-                  >
-                    <TableCell>{project.version}</TableCell>
-                    <TableCell>{project.region}</TableCell>
-                    <TableCell className="font-medium">{project.name}</TableCell>
-                    <TableCell>{project.startDate}</TableCell>
-                    <TableCell>{project.endDate}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    검색 결과가 없습니다.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-
-          {/* 페이지네이션 */}
-          {projectData && projectData.totalPages > 1 && (
-            <div className="mt-6">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (!projectData.first) {
-                          handlePageChange(projectData.pageNo - 1);
-                        }
-                      }}
-                      className={projectData.first ? 'pointer-events-none opacity-50' : ''}
+            <div className="grid grid-cols-[auto_auto_auto_1fr] items-center gap-6">
+              {/* 시작일 선택 */}
+              <div className="space-y-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !searchParams.startDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {searchParams.startDate ? (
+                        format(searchParams.startDate, 'yyyy-MM-dd')
+                      ) : (
+                        <span>시작일</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        searchParams.startDate ? new Date(searchParams.startDate) : undefined
+                      }
+                      onSelect={(date) =>
+                        setSearchParams({
+                          ...searchParams,
+                          startDate: date ? format(date, 'yyyy-MM-dd') : undefined,
+                        })
+                      }
+                      initialFocus
                     />
-                  </PaginationItem>
-                  {/* 페이지 번호 렌더링 (간단한 버전) */}
-                  {[...Array(projectData.totalPages).keys()].map((pageNumber) => (
-                    <PaginationItem key={pageNumber}>
-                      <PaginationLink
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <ArrowRight className="text-muted-foreground h-5 w-5 scale-150" />
+
+              {/* 종료일 선택 */}
+              <div className="space-y-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !searchParams.endDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {searchParams.endDate ? (
+                        format(searchParams.endDate, 'yyyy-MM-dd')
+                      ) : (
+                        <span>종료일</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={searchParams.endDate ? new Date(searchParams.endDate) : undefined}
+                      onSelect={(date) =>
+                        setSearchParams({
+                          ...searchParams,
+                          endDate: date ? format(date, 'yyyy-MM-dd') : undefined,
+                        })
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={onResetClick}>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  초기화
+                </Button>
+                <Button onClick={onSearchClick} disabled={isLoading}>
+                  <Search className="mr-2 h-4 w-4" />
+                  {isLoading ? '검색 중...' : '검색'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 결과 테이블 섹션 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>검색 결과</CardTitle>
+            {projectData && (
+              <p className="text-muted-foreground text-sm">총 {projectData.totalElements}개</p>
+            )}
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[120px]">버전</TableHead>
+                  <TableHead className="w-[120px]">지역</TableHead>
+                  <TableHead>프로젝트명</TableHead>
+                  <TableHead className="w-[150px]">시작일</TableHead>
+                  <TableHead className="w-[150px]">종료일</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      데이터를 불러오는 중입니다...
+                    </TableCell>
+                  </TableRow>
+                ) : projectData?.content && projectData.content.length > 0 ? (
+                  projectData.content.map((project, index) => (
+                    <TableRow
+                      key={index}
+                      className="hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => handleRowClick(project.id)}
+                    >
+                      <TableCell>{project.version}</TableCell>
+                      <TableCell>{project.region}</TableCell>
+                      <TableCell className="font-medium">{project.name}</TableCell>
+                      <TableCell>{project.startDate}</TableCell>
+                      <TableCell>{project.endDate}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      검색 결과가 없습니다.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            {/* 페이지네이션 */}
+            {projectData && projectData.totalPages > 1 && (
+              <div className="mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
                         href="#"
-                        isActive={pageNumber === projectData.pageNo}
                         onClick={(e) => {
                           e.preventDefault();
-                          handlePageChange(pageNumber);
+                          if (!projectData.first) {
+                            handlePageChange(projectData.pageNo - 1);
+                          }
                         }}
-                      >
-                        {pageNumber + 1}
-                      </PaginationLink>
+                        className={projectData.first ? 'pointer-events-none opacity-50' : ''}
+                      />
                     </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (!projectData.last) {
-                          handlePageChange(projectData.pageNo + 1);
-                        }
-                      }}
-                      className={projectData.last ? 'pointer-events-none opacity-50' : ''}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                    {/* 페이지 번호 렌더링 (간단한 버전) */}
+                    {[...Array(projectData.totalPages).keys()].map((pageNumber) => (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          href="#"
+                          isActive={pageNumber === projectData.pageNo}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(pageNumber);
+                          }}
+                        >
+                          {pageNumber + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (!projectData.last) {
+                            handlePageChange(projectData.pageNo + 1);
+                          }
+                        }}
+                        className={projectData.last ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AuthGuard>
   );
 }
-
-export default withAuth(ProjectPage, ['admin', '관리자', '직원']);
