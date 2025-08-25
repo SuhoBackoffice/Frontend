@@ -12,18 +12,31 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { Plus } from 'lucide-react';
 
 interface ProjectStraightProps {
   promiseData: Promise<ApiResponse<ProjectInfoStraightResponse[]>>;
+  projectId: number;
 }
 
-export default function ProjectStraightDetail({ promiseData }: ProjectStraightProps) {
+export default function ProjectStraightDetail({ promiseData, projectId }: ProjectStraightProps) {
   const data = use(promiseData).data!;
+  const router = useRouter();
+
+  const onRegisterClick = () => {
+    router.push(`/project/${projectId}/straight/register`);
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>직선 레일</CardTitle>
+        <Button variant="outline" onClick={onRegisterClick} className="h-auto px-3 py-1">
+          <Plus className="mr-2 h-4 w-4" />
+          추가 등록
+        </Button>
       </CardHeader>
       <CardContent>
         <Table className="border text-sm [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">
