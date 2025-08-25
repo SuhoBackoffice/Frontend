@@ -5,6 +5,7 @@ import {
   NewProjectRequest,
   GetProjectListRequest,
   GetProjectDetailRequest,
+  PostProjectStraightRequest,
   //응답
   ProjectSearchSortResponse,
   ProjectInfoResponse,
@@ -89,6 +90,20 @@ export async function getProjectBranchDetail(
   const { projectId } = params;
   return fetchApi<ProjectInfoBranchResponse[]>(`/project/${projectId}/branch`, {
     method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function postProjectStraightRegister(
+  data: PostProjectStraightRequest[],
+  projectId: number
+): Promise<ApiResponse<null>> {
+  return fetchApi<null>(`/project/${projectId}/straight`, {
+    method: 'POST',
+    body: JSON.stringify(data),
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',

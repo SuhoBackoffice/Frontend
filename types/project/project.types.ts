@@ -21,6 +21,13 @@ export interface GetProjectDetailRequest {
   projectId: number;
 }
 
+export interface PostProjectStraightRequest {
+  length: number;
+  straightTypeId: number;
+  totalQuantity: number;
+  isLoopRail: boolean;
+}
+
 // 응답
 export interface ProjectSearchSortResponse {
   id: string;

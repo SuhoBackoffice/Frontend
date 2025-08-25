@@ -41,7 +41,7 @@ export default async function ProjectDetail({ params }: { params: Params }) {
 
         {/* 섹션 2: 직선 레일 */}
         <Suspense fallback={<ProjectStraightDetailLoading />}>
-          <ProjectStraightDetail promiseData={projectStraightDetailPromise} />
+          <ProjectStraightDetail promiseData={projectStraightDetailPromise} projectId={id} />
         </Suspense>
 
         {/* 섹션 3: 분기 레일 */}

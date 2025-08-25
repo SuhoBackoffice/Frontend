@@ -14,10 +14,14 @@ export async function fetchApi<T>(
 
   if (typeof window === 'undefined') {
     const { cookies } = await import('next/headers');
-    const cookieStore = cookies();
-    const cookieString = cookieStore.toString();
-    if (cookieString) {
-      headers.set('Cookie', cookieString);
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore
+      .getAll()
+      .map(({ name, value }) => `${name}=${encodeURIComponent(value)}`)
+      .join('; ');
+
+    if (cookieHeader) {
+      headers.set('Cookie', cookieHeader);
     }
   }
 
