@@ -101,7 +101,7 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
                     <TableCell className="text-center">{branch.totalQuantity}</TableCell>
                     <TableCell className="text-center">{branch.completedQuantity}</TableCell>
                     <TableCell className="text-center">{progress}%</TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="w-20 text-center">
                       <Button
                         size="icon"
                         className="h-8 w-8"

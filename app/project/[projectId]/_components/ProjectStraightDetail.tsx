@@ -167,13 +167,13 @@ export default function ProjectStraightDetail({ promiseData, projectId }: Projec
                     <TableCell className="text-center">
                       {straight.holePosition === 0 ? '❌' : straight.holePosition}
                     </TableCell>
-                    <TableCell className="text-center">{straight.litzInfo.litz1}</TableCell>
-                    <TableCell className="text-center">{straight.litzInfo.litz2}</TableCell>
-                    <TableCell className="text-center">{straight.litzInfo.litz3}</TableCell>
-                    <TableCell className="text-center">{straight.litzInfo.litz4}</TableCell>
-                    <TableCell className="text-center">{straight.litzInfo.litz5}</TableCell>
-                    <TableCell className="text-center">{straight.litzInfo.litz6}</TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="w-13 text-center">{straight.litzInfo.litz1}</TableCell>
+                    <TableCell className="w-13 text-center">{straight.litzInfo.litz2}</TableCell>
+                    <TableCell className="w-13 text-center">{straight.litzInfo.litz3}</TableCell>
+                    <TableCell className="w-13 text-center">{straight.litzInfo.litz4}</TableCell>
+                    <TableCell className="w-13 text-center">{straight.litzInfo.litz5}</TableCell>
+                    <TableCell className="w-13 text-center">{straight.litzInfo.litz6}</TableCell>
+                    <TableCell className="w-40 text-center">
                       {isEditing ? (
                         <div className="flex justify-center gap-2">
                           <Button
