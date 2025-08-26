@@ -28,6 +28,10 @@ export interface PostProjectStraightRequest {
   isLoopRail: boolean;
 }
 
+export interface PatchProjectStraightRequest {
+  totalQuantity: number;
+}
+
 // 응답
 export interface ProjectSearchSortResponse {
   id: string;
