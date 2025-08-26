@@ -12,6 +12,7 @@ import {
   ProjecInfoDetailResponse,
   ProjectInfoStraightResponse,
   ProjectInfoBranchResponse,
+  PatchProjectStraightRequest,
 } from '@/types/project/project.types';
 
 export async function postNewProject(data: NewProjectRequest): Promise<ApiResponse<null>> {
@@ -103,6 +104,30 @@ export async function postProjectStraightRegister(
 ): Promise<ApiResponse<null>> {
   return fetchApi<null>(`/project/${projectId}/straight`, {
     method: 'POST',
+    body: JSON.stringify(data),
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function deleteProjectStraight(projectStraightId: number): Promise<ApiResponse<null>> {
+  return fetchApi<null>(`/project/straight/${projectStraightId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function patchProjectStraight(
+  data: PatchProjectStraightRequest,
+  projectStraightId: number
+): Promise<ApiResponse<null>> {
+  return fetchApi<null>(`/project/straight/${projectStraightId}`, {
+    method: 'PATCH',
     body: JSON.stringify(data),
     credentials: 'include',
     headers: {
