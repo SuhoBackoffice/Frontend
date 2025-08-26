@@ -56,11 +56,12 @@ export interface ProjecInfoDetailResponse {
 }
 
 export interface ProjectInfoBranchResponse {
-  branchRailId: number;
+  projectBranchId: number;
   branchCode: string;
   branchVersion: string;
   totalQuantity: number;
   completedQuantity: number;
+  branchTypeId: number;
 }
 
 export interface ProjectInfoStraightResponse {
