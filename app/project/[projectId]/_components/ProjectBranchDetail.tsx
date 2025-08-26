@@ -123,12 +123,12 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
           </TableBody>
         </Table>
       </CardContent>
-      <BomListModal
+      <BomListModal<BranchDetailInfoBom>
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         data={bomData || []}
         headers={bomHeaders}
-        keys={bomKeys}
+        keys={bomKeys as (keyof BranchDetailInfoBom)[]}
         title={`${currentBranchCode}번 분기 BOM List`}
         description={`${currentBranchCode}번 분기에 대한 자재 목록입니다.`}
       />

@@ -11,17 +11,17 @@ import {
 } from '@/components/ui/table';
 import { DialogDescription } from '@radix-ui/react-dialog';
 
-interface BomListModalProps {
+interface BomListModalProps<T> {
   isOpen: boolean;
   onClose: () => void;
-  data: any[];
+  data: T[] | null;
   headers: string[];
-  keys: string[];
+  keys: (keyof T)[];
   title: string;
   description: string;
 }
 
-export default function BomListModal({
+export default function BomListModal<T>({
   isOpen,
   onClose,
   title,
@@ -29,7 +29,7 @@ export default function BomListModal({
   headers,
   keys,
   data,
-}: BomListModalProps) {
+}: BomListModalProps<T>) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] max-w-none overflow-y-auto sm:max-w-[800px] md:max-w-[1000px] lg:max-w-[1200px]">
@@ -52,11 +52,17 @@ export default function BomListModal({
               {data && data.length > 0 ? (
                 data.map((item, dataIndex) => (
                   <TableRow key={dataIndex}>
-                    {keys.map((key, keyIndex) => (
-                      <TableCell key={keyIndex} className="text-center">
-                        {typeof item[key] === 'boolean' ? (item[key] ? 'Yes' : 'No') : item[key]}
-                      </TableCell>
-                    ))}
+                    {keys.map((key, keyIndex) => {
+                      const value = item[key];
+                      return (
+                        <TableCell key={keyIndex} className="text-center">
+                          {/* 데이터 타입이 boolean일 경우 'Yes' 또는 'No'로 변환 */}
+                          {
+                            typeof value === 'boolean' ? (value ? '✅' : '❌') : String(value) // ✅ 값을 문자열로 변환하여 렌더링
+                          }
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))
               ) : (
