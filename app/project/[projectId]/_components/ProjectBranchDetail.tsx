@@ -12,18 +12,31 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface ProjectBranchProps {
   promiseData: Promise<ApiResponse<ProjectInfoBranchResponse[]>>;
+  projectId: number;
 }
 
-export default function ProjectBranchDetail({ promiseData }: ProjectBranchProps) {
+export default function ProjectBranchDetail({ promiseData, projectId }: ProjectBranchProps) {
   const data = use(promiseData).data!;
+  const router = useRouter();
+
+  const onRegisterClick = () => {
+    router.push(`/project/${projectId}/branch/register`);
+  };
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>분기레일</CardTitle>
+        <Button variant="outline" onClick={onRegisterClick} className="h-auto px-3 py-1 text-sm">
+          <Plus className="mr-2 h-4 w-4" />
+          추가 등록
+        </Button>
       </CardHeader>
       <CardContent>
         <Table className="border text-sm [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">

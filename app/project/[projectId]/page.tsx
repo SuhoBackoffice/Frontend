@@ -46,7 +46,7 @@ export default async function ProjectDetail({ params }: { params: Params }) {
 
         {/* 섹션 3: 분기 레일 */}
         <Suspense fallback={<ProjectBranchDetailLoading />}>
-          <ProjectBranchDetail promiseData={projectBranchDetailPromise} />
+          <ProjectBranchDetail promiseData={projectBranchDetailPromise} projectId={id} />
         </Suspense>
       </div>
     </AuthGuard>
