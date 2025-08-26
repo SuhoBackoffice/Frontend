@@ -1,8 +1,8 @@
 'use client';
 
-import { ApiResponse } from '@/types/api.types';
+import { ApiError, ApiResponse } from '@/types/api.types';
 import { ProjectInfoBranchResponse } from '@/types/project/project.types';
-import { use } from 'react';
+import { use, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -13,8 +13,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { ExternalLink, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getBranchBomList } from '@/lib/api/branch/branch.api';
+import { BranchDetailInfoBom } from '@/types/branch/branch.types';
+import { toast } from 'sonner';
+import BomListModal from '@/components/project/branch/BomListModal';
 
 interface ProjectBranchProps {
   promiseData: Promise<ApiResponse<ProjectInfoBranchResponse[]>>;
@@ -24,10 +28,45 @@ interface ProjectBranchProps {
 export default function ProjectBranchDetail({ promiseData, projectId }: ProjectBranchProps) {
   const data = use(promiseData).data!;
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bomData, setBomData] = useState<BranchDetailInfoBom[] | null>(null);
+  const [currentBranchCode, setCurrentBranchCode] = useState('');
 
   const onRegisterClick = () => {
     router.push(`/project/${projectId}/branch/register`);
   };
+
+  const handleBomListClick = async (branchTypeId: number, branchCode: string) => {
+    try {
+      setIsModalOpen(false);
+      setBomData(null);
+      setCurrentBranchCode(branchCode);
+
+      const response = await getBranchBomList({ branchTypeId });
+      if (response.data) {
+        setBomData(response.data);
+        setIsModalOpen(true);
+      }
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : '분기레일 BOM List 조회 실패. 서버 상태가 좋지 않습니다.';
+      toast.error(message);
+    }
+  };
+
+  //모달에 전달할 header, keys
+  const bomHeaders = ['품목 구분', '도번', '품명', '규격', '단위 수량', '단위', '사급'];
+  const bomKeys = [
+    'itemType',
+    'drawingNumber',
+    'itemName',
+    'specification',
+    'unitQuantity',
+    'unit',
+    'suppliedMaterial',
+  ];
 
   return (
     <Card>
@@ -62,13 +101,21 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
                     <TableCell className="text-center">{branch.totalQuantity}</TableCell>
                     <TableCell className="text-center">{branch.completedQuantity}</TableCell>
                     <TableCell className="text-center">{progress}%</TableCell>
-                    <TableCell className="text-center">{branch.branchTypeId}</TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleBomListClick(branch.branchTypeId, branch.branchCode)}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   Branch 정보가 없습니다.
                 </TableCell>
               </TableRow>
@@ -76,6 +123,15 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
           </TableBody>
         </Table>
       </CardContent>
+      <BomListModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        data={bomData || []}
+        headers={bomHeaders}
+        keys={bomKeys}
+        title={`${currentBranchCode}번 분기 BOM List`}
+        description={`${currentBranchCode}번 분기에 대한 자재 목록입니다.`}
+      />
     </Card>
   );
 }

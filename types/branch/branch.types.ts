@@ -4,6 +4,10 @@ export interface GetBranchLatestBomRequest {
   versionInfoId: string;
 }
 
+export interface GetBranchBomListRequest {
+  branchTypeId: number;
+}
+
 // 응답
 export interface BranchInfoResponse {
   branchTypeId: number;
