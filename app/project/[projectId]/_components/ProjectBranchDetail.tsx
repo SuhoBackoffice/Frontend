@@ -46,6 +46,7 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
               <TableHead className="text-center">총 수량</TableHead>
               <TableHead className="text-center">완료 수량</TableHead>
               <TableHead className="text-center">진행률</TableHead>
+              <TableHead className="text-center">BOM List</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y">
@@ -56,11 +57,12 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
                     ? ((branch.completedQuantity / branch.totalQuantity) * 100).toFixed(1)
                     : 0;
                 return (
-                  <TableRow key={branch.branchRailId} className="divide-x">
+                  <TableRow key={branch.projectBranchId} className="divide-x">
                     <TableCell className="text-center font-medium">{branch.branchCode}</TableCell>
                     <TableCell className="text-center">{branch.totalQuantity}</TableCell>
                     <TableCell className="text-center">{branch.completedQuantity}</TableCell>
                     <TableCell className="text-center">{progress}%</TableCell>
+                    <TableCell className="text-center">{branch.branchTypeId}</TableCell>
                   </TableRow>
                 );
               })
