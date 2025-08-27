@@ -8,6 +8,12 @@ export interface GetBranchBomListRequest {
   branchTypeId: number;
 }
 
+export interface UploadBranchBomRequest {
+  branchCode: string;
+  versionInfoId: number;
+  file: File;
+}
+
 // 응답
 export interface BranchInfoResponse {
   branchTypeId: number;
@@ -27,4 +33,8 @@ export interface BranchDetailInfoBom {
   unitQuantity: number;
   unit: string;
   suppliedMaterial: boolean;
+}
+
+export interface UploadBranchBomResponse {
+  branchTypeId: number;
 }

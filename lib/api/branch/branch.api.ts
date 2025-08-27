@@ -3,6 +3,8 @@ import {
   BranchInfoResponse,
   GetBranchBomListRequest,
   GetBranchLatestBomRequest,
+  UploadBranchBomRequest,
+  UploadBranchBomResponse,
 } from '@/types/branch/branch.types';
 import { fetchApi } from '../api-client';
 import { ApiResponse } from '@/types/api.types';
@@ -40,5 +42,25 @@ export async function getBranchBomList(
     headers: {
       'Content-Type': 'application/json',
     },
+  });
+}
+
+export async function uploadBranchBom({
+  branchCode,
+  versionInfoId,
+  file,
+}: UploadBranchBomRequest): Promise<ApiResponse<UploadBranchBomResponse>> {
+  const qs = new URLSearchParams({
+    branchCode,
+    versionInfoId: String(versionInfoId),
+  });
+
+  const form = new FormData();
+  form.append('file', file);
+
+  return fetchApi<UploadBranchBomResponse>(`/branch/bom/upload?${qs.toString()}`, {
+    method: 'POST',
+    credentials: 'include',
+    body: form,
   });
 }

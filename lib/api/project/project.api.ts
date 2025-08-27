@@ -13,6 +13,8 @@ import {
   ProjectInfoStraightResponse,
   ProjectInfoBranchResponse,
   PatchProjectStraightRequest,
+  PostProjectBranchRequest,
+  PostProjectBranchRegisterResponse,
 } from '@/types/project/project.types';
 
 export async function postNewProject(data: NewProjectRequest): Promise<ApiResponse<null>> {
@@ -128,6 +130,20 @@ export async function patchProjectStraight(
 ): Promise<ApiResponse<null>> {
   return fetchApi<null>(`/project/straight/${projectStraightId}`, {
     method: 'PATCH',
+    body: JSON.stringify(data),
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function postProjectBranchRegister(
+  data: PostProjectBranchRequest[],
+  projectId: number
+): Promise<ApiResponse<PostProjectBranchRegisterResponse>> {
+  return fetchApi<PostProjectBranchRegisterResponse>(`/project/${projectId}/branch`, {
+    method: 'POST',
     body: JSON.stringify(data),
     credentials: 'include',
     headers: {
