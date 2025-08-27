@@ -15,25 +15,25 @@ export default function ProjectInfoDetail({ promiseData }: ProjectDetailProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>프로젝트 명 : {data.name}</CardTitle>
+        <CardTitle className="text-2xl">프로젝트 명 : [{data.name}]</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <div className="space-y-1">
-            <p className="text-muted-foreground text-sm font-medium">버전</p>
-            <p className="font-semibold">{data.version}</p>
+            <p className="text-muted-foreground text-lg font-medium">버전</p>
+            <p className="text-2xl font-semibold">{data.version}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-muted-foreground text-sm font-medium">지역</p>
-            <p className="font-semibold">{data.region}</p>
+            <p className="text-muted-foreground text-lg font-medium">지역</p>
+            <p className="text-2xl font-semibold">{data.region}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-muted-foreground text-sm font-medium">시작일</p>
-            <p className="font-semibold">{data.startDate}</p>
+            <p className="text-muted-foreground text-lg font-medium">시작일</p>
+            <p className="text-2xl font-semibold">{data.startDate}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-muted-foreground text-sm font-medium">종료일</p>
-            <p className="font-semibold">{data.endDate}</p>
+            <p className="text-muted-foreground text-lg font-medium">종료일</p>
+            <p className="text-2xl font-semibold">{data.endDate}</p>
           </div>
         </div>
       </CardContent>

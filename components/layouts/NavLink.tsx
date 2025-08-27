@@ -19,7 +19,7 @@ export default function NavLink({ href, children, className }: NavLinkProps) {
       href={href}
       className={cn(
         'hover:text-primary font-medium transition-colors',
-        isActive ? 'text-primary' : 'text-muted-foreground',
+        isActive ? 'text-primary font-semibold' : 'text-muted-foreground',
         className
       )}
     >

@@ -32,6 +32,11 @@ export interface PatchProjectStraightRequest {
   totalQuantity: number;
 }
 
+export interface PostProjectBranchRequest {
+  branchTypeId: number;
+  quantity: number;
+}
+
 // 응답
 export interface ProjectSearchSortResponse {
   id: string;
@@ -48,6 +53,7 @@ export interface ProjectInfoResponse {
 }
 
 export interface ProjecInfoDetailResponse {
+  versionInfoId: number;
   version: string;
   region: string;
   name: string;
@@ -56,11 +62,12 @@ export interface ProjecInfoDetailResponse {
 }
 
 export interface ProjectInfoBranchResponse {
-  branchRailId: number;
+  projectBranchId: number;
   branchCode: string;
   branchVersion: string;
   totalQuantity: number;
   completedQuantity: number;
+  branchTypeId: number;
 }
 
 export interface ProjectInfoStraightResponse {
@@ -80,4 +87,8 @@ export interface LitzWireSupportInfo {
   litz4: number;
   litz5: number;
   litz6: number;
+}
+
+export interface PostProjectBranchRegisterResponse {
+  projectId: number;
 }

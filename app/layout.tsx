@@ -21,13 +21,14 @@ export const metadata: Metadata = {
   description: '수호 테크 서버',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className="scroll-smooth" suppressHydrationWarning>
+    <html
+      lang="ko"
+      data-scroll-behavior="smooth"
+      className="scroll-smooth"
+      suppressHydrationWarning
+    >
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
           <div className="flex min-h-screen flex-col">

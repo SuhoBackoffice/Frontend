@@ -163,7 +163,10 @@ export default function ProjectPage() {
   return (
     <AuthGuard allowedRoles={['admin', '관리자', '사용자']}>
       <div className="container mx-auto space-y-4 p-4 md:p-8">
-        <h1 className="text-3xl font-bold tracking-tight">프로젝트 조회</h1>
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight">프로젝트 목록</h1>
+          <p className="text-muted-foreground">등록된 프로젝트를 확인하세요</p>
+        </div>
 
         {/* 검색 필터 섹션 */}
         <Card>

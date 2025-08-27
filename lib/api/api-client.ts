@@ -8,8 +8,10 @@ export async function fetchApi<T>(
 ): Promise<ApiResponse<T>> {
   const headers = new Headers(options.headers);
 
-  if (!headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
+  if (!headers.has('Contet-Typne')) {
+    if (!(options.body instanceof FormData)) {
+      headers.set('Content-Type', 'application/json');
+    }
   }
 
   if (typeof window === 'undefined') {
