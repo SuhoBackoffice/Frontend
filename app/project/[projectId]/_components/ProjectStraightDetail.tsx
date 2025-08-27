@@ -101,29 +101,29 @@ export default function ProjectStraightDetail({ promiseData, projectId }: Projec
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between text-2xl font-bold">
         <CardTitle>직선 레일</CardTitle>
-        <Button variant="outline" onClick={onRegisterClick} className="h-auto px-3 py-1 text-sm">
+        <Button variant="default" onClick={onRegisterClick} className="h-auto px-3 py-1 text-lg">
           <Plus className="mr-2 h-4 w-4" />
           추가 등록
         </Button>
       </CardHeader>
       <CardContent>
-        <Table className="border text-sm [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">
+        <Table className="border text-lg [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">
           <TableHeader className="border-b">
             <TableRow className="divide-x">
-              <TableHead className="text-center">길이</TableHead>
-              <TableHead className="text-center">타입</TableHead>
-              <TableHead className="text-center">수량</TableHead>
-              <TableHead className="text-center">루프레일</TableHead>
-              <TableHead className="text-center">가공</TableHead>
-              <TableHead className="text-center">Litz1</TableHead>
-              <TableHead className="text-center">Litz2</TableHead>
-              <TableHead className="text-center">Litz3</TableHead>
-              <TableHead className="text-center">Litz4</TableHead>
-              <TableHead className="text-center">Litz5</TableHead>
-              <TableHead className="text-center">Litz6</TableHead>
-              <TableHead className="w-[120px] text-center">관리</TableHead>
+              <TableHead className="text-right font-bold">길이</TableHead>
+              <TableHead className="w-20 text-center font-bold">타입</TableHead>
+              <TableHead className="w-30 text-center font-bold">수량</TableHead>
+              <TableHead className="w-30 text-center font-bold">루프레일</TableHead>
+              <TableHead className="w-30 text-center font-bold">가공</TableHead>
+              <TableHead className="w-15 text-center font-bold">Litz1</TableHead>
+              <TableHead className="w-15 text-center font-bold">Litz2</TableHead>
+              <TableHead className="w-15 text-center font-bold">Litz3</TableHead>
+              <TableHead className="w-15 text-center font-bold">Litz4</TableHead>
+              <TableHead className="w-15 text-center font-bold">Litz5</TableHead>
+              <TableHead className="w-15 text-center font-bold">Litz6</TableHead>
+              <TableHead className="w-40 text-center font-bold">관리</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y">
@@ -134,7 +134,7 @@ export default function ProjectStraightDetail({ promiseData, projectId }: Projec
 
                 return (
                   <TableRow key={straight.straightRailId} className="divide-x">
-                    <TableCell className="text-center">{straight.length}</TableCell>
+                    <TableCell className="text-right">{straight.length}</TableCell>
                     <TableCell className="text-center">{straight.straightType}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center">
@@ -167,13 +167,13 @@ export default function ProjectStraightDetail({ promiseData, projectId }: Projec
                     <TableCell className="text-center">
                       {straight.holePosition === 0 ? '❌' : straight.holePosition}
                     </TableCell>
-                    <TableCell className="w-13 text-center">{straight.litzInfo.litz1}</TableCell>
-                    <TableCell className="w-13 text-center">{straight.litzInfo.litz2}</TableCell>
-                    <TableCell className="w-13 text-center">{straight.litzInfo.litz3}</TableCell>
-                    <TableCell className="w-13 text-center">{straight.litzInfo.litz4}</TableCell>
-                    <TableCell className="w-13 text-center">{straight.litzInfo.litz5}</TableCell>
-                    <TableCell className="w-13 text-center">{straight.litzInfo.litz6}</TableCell>
-                    <TableCell className="w-40 text-center">
+                    <TableCell className="text-center">{straight.litzInfo.litz1}</TableCell>
+                    <TableCell className="text-center">{straight.litzInfo.litz2}</TableCell>
+                    <TableCell className="text-center">{straight.litzInfo.litz3}</TableCell>
+                    <TableCell className="text-center">{straight.litzInfo.litz4}</TableCell>
+                    <TableCell className="text-center">{straight.litzInfo.litz5}</TableCell>
+                    <TableCell className="text-center">{straight.litzInfo.litz6}</TableCell>
+                    <TableCell className="text-center">
                       {isEditing ? (
                         <div className="flex justify-center gap-2">
                           <Button
@@ -198,7 +198,7 @@ export default function ProjectStraightDetail({ promiseData, projectId }: Projec
                         <div className="flex justify-center gap-2">
                           <Button
                             size="icon"
-                            variant="outline"
+                            variant="default"
                             className="h-8 w-8"
                             onClick={() => handleEditClick(straight)}
                           >

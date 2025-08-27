@@ -70,22 +70,22 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between text-2xl font-bold">
         <CardTitle>분기레일</CardTitle>
-        <Button variant="outline" onClick={onRegisterClick} className="h-auto px-3 py-1 text-sm">
+        <Button variant="default" onClick={onRegisterClick} className="h-auto px-3 py-1 text-lg">
           <Plus className="mr-2 h-4 w-4" />
           추가 등록
         </Button>
       </CardHeader>
       <CardContent>
-        <Table className="border text-sm [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">
+        <Table className="border text-lg [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">
           <TableHeader className="border-b">
             <TableRow className="divide-x">
-              <TableHead className="text-center">분기 코드</TableHead>
-              <TableHead className="text-center">총 수량</TableHead>
-              <TableHead className="text-center">완료 수량</TableHead>
-              <TableHead className="text-center">진행률</TableHead>
-              <TableHead className="text-center">BOM List</TableHead>
+              <TableHead className="text-center font-bold">분기 코드</TableHead>
+              <TableHead className="w-30 text-center font-bold">총 수량</TableHead>
+              <TableHead className="w-30 text-center font-bold">완료 수량</TableHead>
+              <TableHead className="w-30 text-center font-bold">진행률</TableHead>
+              <TableHead className="w-30 text-center font-bold">BOM List</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y">
@@ -101,10 +101,11 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
                     <TableCell className="text-center">{branch.totalQuantity}</TableCell>
                     <TableCell className="text-center">{branch.completedQuantity}</TableCell>
                     <TableCell className="text-center">{progress}%</TableCell>
-                    <TableCell className="w-20 text-center">
+                    <TableCell className="text-center">
                       <Button
                         size="icon"
                         className="h-8 w-8"
+                        variant="outline"
                         onClick={() => handleBomListClick(branch.branchTypeId, branch.branchCode)}
                       >
                         <ExternalLink className="h-4 w-4" />
