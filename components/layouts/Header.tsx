@@ -12,8 +12,8 @@ import { LoginDialog } from '../auth/LoginDialog';
 import { LogoutDialog } from '../auth/LogoutDialog';
 
 const navItems = [
-  { href: '/', text: '홈' },
   { href: '/project', text: '프로젝트' },
+  { href: '/project/register', text: '신규 프로젝트' },
   { href: '/about', text: '소개' },
 ];
 
