@@ -15,6 +15,7 @@ import {
   PatchProjectStraightRequest,
   PostProjectBranchRequest,
   PostProjectBranchRegisterResponse,
+  PatchProjectBranchRequest,
 } from '@/types/project/project.types';
 
 export async function postNewProject(data: NewProjectRequest): Promise<ApiResponse<null>> {
@@ -144,6 +145,30 @@ export async function postProjectBranchRegister(
 ): Promise<ApiResponse<PostProjectBranchRegisterResponse>> {
   return fetchApi<PostProjectBranchRegisterResponse>(`/project/${projectId}/branch`, {
     method: 'POST',
+    body: JSON.stringify(data),
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function deleteProjectBranch(projectBranchId: number): Promise<ApiResponse<null>> {
+  return fetchApi<null>(`/project/branch/${projectBranchId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function patchProjectBranch(
+  data: PatchProjectBranchRequest,
+  projectBranchId: number
+): Promise<ApiResponse<null>> {
+  return fetchApi<null>(`/project/branch/${projectBranchId}`, {
+    method: 'PATCH',
     body: JSON.stringify(data),
     credentials: 'include',
     headers: {

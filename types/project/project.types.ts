@@ -37,6 +37,10 @@ export interface PostProjectBranchRequest {
   quantity: number;
 }
 
+export interface PatchProjectBranchRequest {
+  totalQuantity: number;
+}
+
 // 응답
 export interface ProjectSearchSortResponse {
   id: string;
