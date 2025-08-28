@@ -165,7 +165,7 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
           </TableHeader>
           <TableBody className="divide-y">
             {branchs && branchs.length > 0 ? (
-              branchs.map((branch) => {
+              branchs.map((branch, index) => {
                 const isEditing = editingRowId === branch.projectBranchId;
                 const totalQuantityError = fieldErrors?.totalQuantity?.[0];
                 const progress =
@@ -173,7 +173,10 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
                     ? ((branch.completedQuantity / branch.totalQuantity) * 100).toFixed(1)
                     : 0;
                 return (
-                  <TableRow key={branch.projectBranchId} className="divide-x">
+                  <TableRow
+                    key={branch.projectBranchId}
+                    className={`divide-x ${index % 2 === 0 ? 'bg-background' : 'bg-accent/50'} hover:bg-accent`}
+                  >
                     <TableCell className="text-center">
                       <div className="relative mx-auto h-30">
                         <Image

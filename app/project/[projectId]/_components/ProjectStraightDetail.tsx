@@ -128,12 +128,15 @@ export default function ProjectStraightDetail({ promiseData, projectId }: Projec
           </TableHeader>
           <TableBody className="divide-y">
             {straights && straights.length > 0 ? (
-              straights.map((straight) => {
+              straights.map((straight, index) => {
                 const isEditing = editingRowId === straight.straightRailId;
                 const totalQuantityError = fieldErrors?.totalQuantity?.[0];
 
                 return (
-                  <TableRow key={straight.straightRailId} className="divide-x">
+                  <TableRow
+                    key={straight.straightRailId}
+                    className={`divide-x ${index % 2 === 0 ? 'bg-background' : 'bg-accent/50'} hover:bg-accent`}
+                  >
                     <TableCell className="text-center">{straight.length}</TableCell>
                     <TableCell className="text-center">{straight.straightType}</TableCell>
                     <TableCell className="text-center">
