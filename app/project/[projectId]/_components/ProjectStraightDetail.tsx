@@ -112,7 +112,7 @@ export default function ProjectStraightDetail({ promiseData, projectId }: Projec
         <Table className="border text-lg [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">
           <TableHeader className="border-b">
             <TableRow className="divide-x">
-              <TableHead className="text-right font-bold">길이</TableHead>
+              <TableHead className="w-auto text-center font-bold">길이</TableHead>
               <TableHead className="w-20 text-center font-bold">타입</TableHead>
               <TableHead className="w-30 text-center font-bold">수량</TableHead>
               <TableHead className="w-30 text-center font-bold">루프레일</TableHead>
@@ -134,7 +134,7 @@ export default function ProjectStraightDetail({ promiseData, projectId }: Projec
 
                 return (
                   <TableRow key={straight.straightRailId} className="divide-x">
-                    <TableCell className="text-right">{straight.length}</TableCell>
+                    <TableCell className="text-center">{straight.length}</TableCell>
                     <TableCell className="text-center">{straight.straightType}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center">

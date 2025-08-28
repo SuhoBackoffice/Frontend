@@ -1,24 +1,24 @@
 'use server';
 
 import { z } from 'zod';
-import { patchProjectStraight } from '../api/project/project.api';
+import { patchProjectBranch } from '../api/project/project.api';
 import { ApiError } from '@/types/api.types';
 
-const updateStraightSchema = z.object({
+const updateBranchSchema = z.object({
   totalQuantity: z.coerce.number().int().positive('수량은 1 이상이어야 합니다.'),
 });
 
 export type UpdateStraightState = {
   success: boolean;
   message: string;
-  errors?: z.inferFlattenedErrors<typeof updateStraightSchema>['fieldErrors'];
+  errors?: z.inferFlattenedErrors<typeof updateBranchSchema>['fieldErrors'];
 };
 
-export async function updateStraightRailAction(
-  projectStraightId: number,
+export async function updateBranchRailAction(
+  projectBranchId: number,
   formData: { totalQuantity: number | '' }
 ): Promise<UpdateStraightState> {
-  const validated = updateStraightSchema.safeParse(formData);
+  const validated = updateBranchSchema.safeParse(formData);
 
   if (!validated.success) {
     return {
@@ -30,14 +30,14 @@ export async function updateStraightRailAction(
 
   try {
     const payload = validated.data;
-    const response = await patchProjectStraight(payload, projectStraightId);
+    const response = await patchProjectBranch(payload, projectBranchId);
 
     return {
       success: response.isSuccess,
       message: response.message,
     };
   } catch (err) {
-    const message = err instanceof ApiError ? err.message : '서버 오류로 업데이트 실패';
+    const message = err instanceof ApiError ? err.message : '서버 오류로 분기레일 업데이트 실패';
     return {
       success: false,
       message,
