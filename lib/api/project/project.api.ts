@@ -1,5 +1,5 @@
 import { fetchApi } from '../api-client';
-import { ApiResponse, PagingResponse } from '@/types/api.types';
+import { ApiResponse, FileResponse, PagingResponse } from '@/types/api.types';
 import {
   //요청
   NewProjectRequest,
@@ -174,5 +174,12 @@ export async function patchProjectBranch(
     headers: {
       'Content-Type': 'application/json',
     },
+  });
+}
+
+export function getProjectQuantityList(projectId: number): Promise<FileResponse> {
+  return fetchApi(`/project/${projectId}/quantity-list`, {
+    method: 'GET',
+    isBlob: true,
   });
 }

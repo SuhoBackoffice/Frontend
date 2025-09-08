@@ -36,7 +36,7 @@ export default async function ProjectDetail({ params }: { params: Params }) {
       <div className="container mx-auto space-y-6 p-4 md:p-8">
         {/* 섹션 1: 기본 정보 */}
         <Suspense fallback={<ProjectInfoDetailLoading />}>
-          <ProjectInfoDetail promiseData={projectDetailPromise} />
+          <ProjectInfoDetail promiseData={projectDetailPromise} projectId={id} />
         </Suspense>
 
         {/* 섹션 2: 직선 레일 */}
