@@ -5,6 +5,11 @@ export interface ApiResponse<T> {
   data: T | null;
 }
 
+export interface FileResponse {
+  blob: Blob;
+  headers: Headers;
+}
+
 export interface PagingResponse<T> {
   content: T[];
   pageNo: number;
