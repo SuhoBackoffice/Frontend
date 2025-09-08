@@ -72,6 +72,7 @@ export interface ProjectInfoBranchResponse {
   totalQuantity: number;
   completedQuantity: number;
   branchTypeId: number;
+  branchName: string;
 }
 
 export interface ProjectInfoStraightResponse {
