@@ -187,7 +187,7 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
         enableColumnFilter: false,
       },
       { accessorKey: 'branchCode', header: '분기 코드', cell: (info) => info.getValue() },
-      { accessorKey: 'name', header: '이름', cell: (info) => info.getValue() },
+      { accessorKey: 'branchName', header: '이름', cell: (info) => info.getValue() },
       {
         accessorKey: 'totalQuantity',
         header: '총 수량',
