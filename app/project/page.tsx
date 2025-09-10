@@ -161,7 +161,7 @@ export default function ProjectPage() {
   const getSelectedSortName = () => sortOptions.find((s) => s.id === searchParams.sort)?.name;
 
   return (
-    <AuthGuard allowedRoles={['admin', '관리자', '사용자']}>
+    <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
       <div className="container mx-auto space-y-4 p-4 md:p-8">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">프로젝트 목록</h1>
