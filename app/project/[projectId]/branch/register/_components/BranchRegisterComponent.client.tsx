@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { postFileUpload } from '@/lib/api/file/file.api';
+import { deleteUploadedFile, postFileUpload } from '@/lib/api/file/file.api';
 import { FileUploadType } from '@/types/file/file.types';
 
 interface Props {
@@ -247,10 +247,25 @@ export default function BranchRegisterComponent({ projectId }: Props) {
     }
   };
 
-  const clearImage = () => {
-    setIsImagePreviewOpen(false);
-    setImageUrl(null);
-    if (imageInputRef.current) imageInputRef.current.value = '';
+  const clearImage = async () => {
+    if (!imageUrl) {
+      toast.error('이미지 정보가 없습니다.');
+      setIsImagePreviewOpen(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+      return;
+    }
+
+    try {
+      const response = await deleteUploadedFile({ fileUrl: imageUrl });
+      toast.success(response.message);
+      setIsImagePreviewOpen(false);
+      setImageUrl(null);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : '이미지 삭제 실패. 서버 상태가 좋지 않습니다.';
+      toast.error(message);
+    }
   };
 
   const isFormFilled = branchCode.trim() !== '' && quantity.trim() !== '';

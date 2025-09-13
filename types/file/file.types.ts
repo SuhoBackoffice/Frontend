@@ -9,6 +9,10 @@ export interface PostFileUploadRequest {
   type: FileUploadType;
 }
 
+export interface DeleteUploadedFileRequest {
+  fileUrl: string;
+}
+
 // 응답
 export interface PostFileUploadResponse {
   fileName: string;

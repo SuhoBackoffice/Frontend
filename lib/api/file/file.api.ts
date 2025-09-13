@@ -1,5 +1,9 @@
 import { ApiResponse } from '@/types/api.types';
-import { PostFileUploadRequest, PostFileUploadResponse } from '@/types/file/file.types';
+import {
+  DeleteUploadedFileRequest,
+  PostFileUploadRequest,
+  PostFileUploadResponse,
+} from '@/types/file/file.types';
 import { fetchApi } from '../api-client';
 
 export async function postFileUpload({
@@ -17,5 +21,21 @@ export async function postFileUpload({
     method: 'POST',
     credentials: 'include',
     body: form,
+  });
+}
+
+export async function deleteUploadedFile({
+  fileUrl,
+}: DeleteUploadedFileRequest): Promise<ApiResponse<null>> {
+  const qs = new URLSearchParams({
+    fileUrl,
+  });
+
+  return fetchApi<null>(`/file?${qs.toString()}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 }
