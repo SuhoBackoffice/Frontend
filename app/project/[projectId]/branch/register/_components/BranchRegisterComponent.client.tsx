@@ -3,6 +3,7 @@
 import AuthGuard from '@/components/auth/AuthGuard';
 import { getProjectDetail } from '@/lib/api/project/project.api';
 import { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProjecInfoDetailResponse } from '@/types/project/project.types';
 import { toast } from 'sonner';
 import { getBranchLatestBomList, uploadBranchBom } from '@/lib/api/branch/branch.api';
@@ -25,6 +26,9 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import { deleteUploadedFile, postFileUpload } from '@/lib/api/file/file.api';
+import { FileUploadType } from '@/types/file/file.types';
 
 interface Props {
   projectId: number;
@@ -49,6 +53,10 @@ export default function BranchRegisterComponent({ projectId }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBomUploaded, setIsBomUploaded] = useState(false);
   const [latestBranchTypeId, setLatestBranchTypeId] = useState<number | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   // 로딩 상태 분리
   const [loadingProject, setLoadingProject] = useState(false);
@@ -156,6 +164,7 @@ export default function BranchRegisterComponent({ projectId }: Props) {
         branchCode,
         versionInfoId: projectDetailData.versionInfoId,
         file,
+        imageUrl,
       });
       setIsBomUploaded(true);
       setBomData(null);
@@ -196,6 +205,66 @@ export default function BranchRegisterComponent({ projectId }: Props) {
       toast.error(message);
     } finally {
       setRegistering(false);
+    }
+  };
+
+  const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
+  const MAX_IMAGE_SIZE = 100 * 1024 * 1024;
+
+  function isImageFile(file: File) {
+    const typeOk = !file.type || ALLOWED_IMAGE_MIME.has(file.type);
+    const sizeOk = file.size <= MAX_IMAGE_SIZE;
+    return typeOk && sizeOk;
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      toast.error('이미지 파일을 선택해주세요.');
+      return;
+    }
+    if (!isImageFile(file)) {
+      toast.error('JPG/PNG/WebP 형식, 100MB 이하만 업로드할 수 있습니다.');
+      if (imageInputRef.current) imageInputRef.current.value = '';
+      return;
+    }
+
+    try {
+      setImageUploading(true);
+      const res = await postFileUpload({
+        file,
+        type: FileUploadType.BRANCH_IMAGE,
+      });
+      setImageUrl(res.data!.fileUrl);
+      toast.success('이미지 업로드 완료');
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : '이미지 업로드 실패. 서버 상태가 좋지 않습니다.';
+      toast.error(message);
+      setImageUrl(null);
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  const clearImage = async () => {
+    if (!imageUrl) {
+      toast.error('이미지 정보가 없습니다.');
+      setIsImagePreviewOpen(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+      return;
+    }
+
+    try {
+      const response = await deleteUploadedFile({ fileUrl: imageUrl });
+      toast.success(response.message);
+      setIsImagePreviewOpen(false);
+      setImageUrl(null);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : '이미지 삭제 실패. 서버 상태가 좋지 않습니다.';
+      toast.error(message);
     }
   };
 
@@ -286,7 +355,7 @@ export default function BranchRegisterComponent({ projectId }: Props) {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="grid grid-cols-2 gap-4">
                         {/* 최신 BOM 적용 */}
                         <div
                           className={cn(
@@ -335,6 +404,92 @@ export default function BranchRegisterComponent({ projectId }: Props) {
                           )}
                         >
                           <p className="text-center text-lg font-bold">신규 BOM 등록하기</p>
+
+                          {/* ✅ 이미지 업로드: 버튼만 풀사이즈(내부 카드 제거) */}
+                          {imageUrl ? (
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  variant="default"
+                                  className="h-12 min-w-0 flex-1 text-base"
+                                  onClick={() => setIsImagePreviewOpen(true)}
+                                  disabled={imageUploading || uploadingBom || loadingLatest}
+                                >
+                                  미리보기
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  className="h-12 w-16 shrink-0"
+                                  onClick={clearImage}
+                                  disabled={imageUploading || uploadingBom || loadingLatest}
+                                >
+                                  제거
+                                </Button>
+                              </div>
+
+                              {/* 미리보기 다이얼로그 */}
+                              <Dialog
+                                open={isImagePreviewOpen}
+                                onOpenChange={setIsImagePreviewOpen}
+                              >
+                                <DialogContent className="sm:max-w-[560px]">
+                                  <DialogHeader>
+                                    <DialogTitle>분기 이미지 미리보기</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="mx-auto w-full">
+                                    <div className="relative mx-auto aspect-square w-full max-w-[480px] overflow-hidden rounded-lg border">
+                                      <Image
+                                        src={imageUrl!}
+                                        alt={`${branchCode} 분기 이미지 미리보기`}
+                                        fill
+                                        sizes="(max-width: 640px) 480px, 480px"
+                                        className="object-cover"
+                                        priority={false}
+                                      />
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <label htmlFor="branch-image-upload" className="w-full">
+                                <Button
+                                  asChild
+                                  variant="default"
+                                  className="h-12 w-full cursor-pointer text-base"
+                                  disabled={imageUploading || uploadingBom || loadingLatest}
+                                >
+                                  <span className="inline-flex items-center justify-center gap-2">
+                                    {imageUploading ? (
+                                      <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        이미지 업로드 중...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <CloudUpload className="h-4 w-4" />
+                                        분기 이미지 업로드(선택)
+                                      </>
+                                    )}
+                                  </span>
+                                </Button>
+                                <input
+                                  ref={imageInputRef}
+                                  id="branch-image-upload"
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp"
+                                  className="hidden"
+                                  onChange={handleImageUpload}
+                                  disabled={imageUploading || uploadingBom || loadingLatest}
+                                />
+                              </label>
+                            </div>
+                          )}
+
+                          {/* BOM 엑셀 업로드 (동일 사이즈) */}
                           <label htmlFor="file-upload" className="w-full">
                             <Button
                               asChild

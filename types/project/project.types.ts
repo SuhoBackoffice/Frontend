@@ -73,6 +73,7 @@ export interface ProjectInfoBranchResponse {
   completedQuantity: number;
   branchTypeId: number;
   branchName: string;
+  imageUrl: string;
 }
 
 export interface ProjectInfoStraightResponse {

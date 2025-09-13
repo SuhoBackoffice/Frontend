@@ -12,6 +12,7 @@ export interface UploadBranchBomRequest {
   branchCode: string;
   versionInfoId: number;
   file: File;
+  imageUrl?: string | null;
 }
 
 // 응답
