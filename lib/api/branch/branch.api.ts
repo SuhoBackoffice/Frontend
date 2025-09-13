@@ -48,12 +48,17 @@ export async function getBranchBomList(
 export async function uploadBranchBom({
   branchCode,
   versionInfoId,
+  imageUrl,
   file,
 }: UploadBranchBomRequest): Promise<ApiResponse<UploadBranchBomResponse>> {
   const qs = new URLSearchParams({
     branchCode,
     versionInfoId: String(versionInfoId),
   });
+
+  if (imageUrl) {
+    qs.append('imageUrl', imageUrl);
+  }
 
   const form = new FormData();
   form.append('file', file);
