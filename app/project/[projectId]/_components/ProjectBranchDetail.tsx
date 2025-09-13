@@ -170,12 +170,12 @@ export default function ProjectBranchDetail({ promiseData, projectId }: ProjectB
   const columns = useMemo<ColumnDef<BranchRail>[]>(
     () => [
       {
-        accessorKey: 'image',
+        accessorKey: 'imageUrl',
         header: '이미지',
-        cell: () => (
-          <div className="relative mx-auto h-30 w-30">
+        cell: (info) => (
+          <div className="relative mx-auto h-20 w-20">
             <Image
-              src="/logo.png"
+              src={info.getValue() ? (info.getValue() as string) : '/logo.png'}
               alt="Branch Logo"
               fill
               className="object-contain"
