@@ -5,6 +5,7 @@ import Providers from './providers';
 import Header from '@/components/layouts/Header';
 import Footer from '@/components/layouts/Footer';
 import { Toaster } from 'sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,12 +32,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <Toaster position="bottom-left" expand={false} richColors />
-            <main className="container flex-1">{children}</main>
-            <Footer />
-          </div>
+          <TooltipProvider delayDuration={150}>
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <Toaster position="bottom-left" expand={false} richColors />
+              <main className="container flex-1">{children}</main>
+              <Footer />
+            </div>
+          </TooltipProvider>
         </Providers>
       </body>
     </html>
