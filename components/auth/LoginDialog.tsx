@@ -17,6 +17,7 @@ import { loginAction, LoginFormState } from '@/lib/action/auth.action'; // Login
 import { useAuthStore } from '@/lib/store/auth.store';
 import { LogIn, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const initialState: LoginFormState = {
   message: '',
@@ -32,14 +33,16 @@ export function LoginDialog() {
     loginAction,
     initialState
   );
+  const router = useRouter();
 
   useEffect(() => {
     if (state.success) {
       toast.success(state.message);
       setLoggedIn(true);
       setIsOpen(false);
+      router.push('/');
     }
-  }, [state.success, state.message, setLoggedIn, setIsOpen]);
+  }, [state.success, state.message, setLoggedIn, setIsOpen, router]);
 
   return (
     <>
