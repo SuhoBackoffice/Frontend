@@ -10,6 +10,7 @@ import { useAuthStore } from '@/lib/store/auth.store';
 
 import { LoginDialog } from '../auth/LoginDialog';
 import { LogoutDialog } from '../auth/LogoutDialog';
+import { SignupButton } from '../auth/SingupButton';
 
 const navItems = [
   { href: '/project', text: '프로젝트' },
@@ -21,7 +22,7 @@ export default function Header() {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   return (
-    <header className="bg-background/70 sticky top-0 z-50 border-b backdrop-blur-lg">
+    <header className="bg-background/70 sticky top-0 z-40 border-b backdrop-blur-lg">
       <div className="container flex h-[var(--header-height)] items-center px-4">
         <div className="grid w-full grid-cols-[200px_1fr_200px] items-center">
           {/* 홈 페이지 */}
@@ -47,10 +48,16 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* 토글 및 로그인 관련 */}
           <div className="flex items-center justify-end gap-2">
-            {/* 로그인 상태에 따른, 버튼 관리 */}
-            {isLoggedIn ? <LogoutDialog /> : <LoginDialog />}
+            {/* 로그인 상태에 따른 버튼 관리 */}
+            {isLoggedIn ? (
+              <LogoutDialog />
+            ) : (
+              <>
+                <SignupButton />
+                <LoginDialog />
+              </>
+            )}
             <ThemeToggle />
           </div>
         </div>
