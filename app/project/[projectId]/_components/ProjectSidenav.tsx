@@ -5,15 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
-import {
-  LayoutDashboard,
-  Settings2,
-  Route,
-  GitBranch,
-  Ellipsis,
-  Boxes,
-  PackagePlus,
-} from 'lucide-react';
+import { LayoutDashboard, Settings2, Route, GitBranch, Boxes, PackagePlus } from 'lucide-react';
 
 type NavItem = {
   label: string;
@@ -22,8 +14,13 @@ type NavItem = {
   children?: NavItem[];
 };
 
+// 경로 정규화: 트레일링 슬래시 제거
+const normalize = (p?: string | null) =>
+  !p ? '' : p !== '/' && p.endsWith('/') ? p.slice(0, -1) : p;
+
 export function ProjectSidenav({ projectId }: { projectId: number }) {
-  const pathname = usePathname();
+  const rawPath = usePathname();
+  const pathname = normalize(rawPath);
   const base = `/project/${projectId}`;
 
   const nav: NavItem[] = [
@@ -44,20 +41,32 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
     },
   ];
 
-  const isActiveHref = (href?: string | null) =>
-    !!href && (pathname === href || pathname.startsWith(href + '/'));
+  const isActiveExact = (href?: string | null) => !!href && pathname === normalize(href);
+
+  const isActiveDeep = (href?: string | null) => {
+    const h = normalize(href);
+    return !!h && (pathname === h || pathname.startsWith(h + '/'));
+  };
+
+  // 섹션 활성화 규칙:
+  // - 개요(href === base): 정확히 일치할 때만 활성
+  // - 나머지: 하위 경로까지 포함해 활성
+  // - 링크 없는 섹션: 자식 중 하나가 활성일 때 활성
+  const isSectionActive = (sectionHref?: string | null, children?: NavItem[]) => {
+    if (sectionHref === base) return isActiveExact(sectionHref);
+    if (sectionHref) return isActiveDeep(sectionHref);
+    return children?.some((c) => isActiveDeep(c.href)) ?? false;
+  };
 
   return (
     <nav className="bg-card rounded-xl border p-3">
       <ul className="flex flex-col gap-3">
         {nav.map((section) => {
-          const sectionActive =
-            isActiveHref(section.href) ||
-            (section.children?.some((c) => isActiveHref(c.href)) ?? false);
+          const sectionActive = isSectionActive(section.href, section.children);
 
           return (
             <li key={section.label}>
-              {/* # 섹션 렌더 */}
+              {/* # 섹션 */}
               {section.href ? (
                 <Button
                   asChild
@@ -84,7 +93,7 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
               {section.children && section.children.length > 0 && (
                 <ul className="mt-2 space-y-1 border-l pl-4">
                   {section.children.map((child) => {
-                    const childActive = isActiveHref(child.href);
+                    const childActive = isActiveDeep(child.href);
                     return (
                       <li key={child.label}>
                         {child.href ? (
