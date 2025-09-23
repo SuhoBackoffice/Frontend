@@ -9,10 +9,10 @@ import AuthGuard from '@/components/auth/AuthGuard';
 type Params = Promise<{ projectId: string }>;
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: `프로젝트 상세 정보` };
+  return { title: `프로젝트 자재 정보` };
 }
 
-export default async function ProjectDetail({ params }: { params: Params }) {
+export default async function ProjectMaterialPage({ params }: { params: Params }) {
   const { projectId } = await params;
   const id = Number(projectId);
 

@@ -5,7 +5,15 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Settings2, Route, GitBranch, Boxes, PackagePlus } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Settings2,
+  Route,
+  GitBranch,
+  Boxes,
+  PackagePlus,
+  ChartColumnBig,
+} from 'lucide-react';
 
 type NavItem = {
   label: string;
@@ -37,7 +45,10 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
       label: '자재 관리',
       href: `${base}/material`,
       icon: Boxes,
-      children: [{ label: '자재 입고 등록', href: `${base}/material/register`, icon: PackagePlus }],
+      children: [
+        { label: '자재 입고 현황', href: `${base}/material/history`, icon: ChartColumnBig },
+        { label: '자재 입고 등록', href: `${base}/material/register`, icon: PackagePlus },
+      ],
     },
   ];
 

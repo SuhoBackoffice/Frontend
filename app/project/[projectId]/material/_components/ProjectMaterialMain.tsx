@@ -1,5 +1,3 @@
-// app/project/[projectId]/_components/ProjectMaterialMain.tsx
-
 'use client';
 
 import { use } from 'react';
@@ -18,14 +16,14 @@ import { Boxes, Package, Truck, Wrench } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge'; // Badge 컴포넌트 import
+import { Badge } from '@/components/ui/badge';
 
 import type { GetMaterialSummaryResponse } from '@/types/material/material.types';
 import type { ApiResponse } from '@/types/api.types';
 
 interface ProjectMaterialMainProps {
   promiseData: Promise<ApiResponse<GetMaterialSummaryResponse>>;
-  projectId: number; // 다른 로직에서 사용할 수 있으므로 유지
+  projectId: number;
 }
 
 export default function ProjectMaterialMain({ promiseData }: ProjectMaterialMainProps) {

@@ -9,7 +9,7 @@ export function useSyncAuth() {
 
   useEffect(() => {
     const syncAuth = async () => {
-      setIsSyncing(true); // <-- 추가: 동기화 시작
+      setIsSyncing(true);
       try {
         const response = await getUserInfo();
         if (response.data) {
@@ -20,7 +20,7 @@ export function useSyncAuth() {
       } catch {
         logout();
       } finally {
-        setIsSyncing(false); // <-- 추가: 동기화 종료 (성공/실패 무관)
+        setIsSyncing(false);
       }
     };
 
@@ -31,11 +31,11 @@ export function useSyncAuth() {
     handleSync();
 
     window.addEventListener('visibilitychange', handleSync);
-    window.addEventListener('focus', handleSync);
+    // window.addEventListener('focus', handleSync);
 
     return () => {
       window.removeEventListener('visibilitychange', handleSync);
-      window.removeEventListener('focus', handleSync);
+      // window.removeEventListener('focus', handleSync);
     };
   }, []);
 }
