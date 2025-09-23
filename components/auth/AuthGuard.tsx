@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/auth.store';
 import { toast } from 'sonner';
@@ -12,12 +12,11 @@ interface AuthGuardProps {
 }
 
 export default function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
-  const { isLoggedIn, user, _hasHydrated } = useAuthStore();
+  const { isLoggedIn, user, _hasHydrated, isSyncing } = useAuthStore();
   const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    if (!_hasHydrated) {
+    if (!_hasHydrated || isSyncing) {
       return;
     }
 
@@ -32,11 +31,19 @@ export default function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
       router.replace('/');
       return;
     }
+  }, [_hasHydrated, isSyncing, isLoggedIn, user, router, allowedRoles]);
 
-    setIsAuthorized(true);
-  }, [_hasHydrated, isLoggedIn, user, router, allowedRoles]);
+  if (!_hasHydrated || isSyncing) {
+    return (
+      <div className="container mx-auto space-y-6 p-4 md:p-8">
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
 
-  if (isAuthorized) {
+  if (isLoggedIn && user && allowedRoles.includes(user.role)) {
     return <>{children}</>;
   }
 
