@@ -1,5 +1,3 @@
-// app/project/[projectId]/material/history/page.tsx
-
 import AuthGuard from '@/components/auth/AuthGuard';
 import { getMaterialHistory } from '@/lib/api/material/material.api';
 import { Metadata } from 'next';
@@ -29,7 +27,6 @@ export default async function ProjectMaterialHistroyPage({
     notFound();
   }
 
-  // API 호출 시 URL의 keyword를 함께 전달
   const materialHistory = getMaterialHistory({
     projectId: id,
     keyword: keyword,

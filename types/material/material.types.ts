@@ -14,6 +14,22 @@ export interface GetMaterialInboundDetailHistroyRequest {
   date: string;
 }
 
+export interface GetMaterialSearchRequest {
+  projectId: number;
+  keyword: string;
+}
+
+export interface PostMaterialInboundRequest {
+  projectId: number;
+  materials: MaterialInboundItemRequest[];
+}
+
+export interface MaterialInboundItemRequest {
+  drawingNumber: string;
+  itemName: string;
+  quantity: number;
+}
+
 // 응답
 export interface GetMaterialSummaryResponse {
   inboundPercent: number;
@@ -35,4 +51,10 @@ export interface GetMaterialInboundDetailHistoryResponse {
   itemName: string;
   receivedAt: string;
   quantity: number;
+}
+
+export interface GetMaterialSearchResponse {
+  id: number;
+  drawingNumber: string;
+  itemName: string;
 }
