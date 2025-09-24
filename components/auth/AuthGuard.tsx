@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/auth.store';
 import { toast } from 'sonner';
-import { Skeleton } from '@/components/ui/skeleton';
+import AuthLoadingScreen from './AuthLoadingScreen'; // 새로 만든 로딩 컴포넌트 import
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -12,12 +12,11 @@ interface AuthGuardProps {
 }
 
 export default function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
-  const { isLoggedIn, user, _hasHydrated } = useAuthStore();
+  const { isLoggedIn, user, _hasHydrated, isSyncing } = useAuthStore();
   const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    if (!_hasHydrated) {
+    if (!_hasHydrated || isSyncing) {
       return;
     }
 
@@ -32,19 +31,15 @@ export default function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
       router.replace('/');
       return;
     }
+  }, [_hasHydrated, isSyncing, isLoggedIn, user, router, allowedRoles]);
 
-    setIsAuthorized(true);
-  }, [_hasHydrated, isLoggedIn, user, router, allowedRoles]);
+  if (!_hasHydrated || isSyncing) {
+    return <AuthLoadingScreen />;
+  }
 
-  if (isAuthorized) {
+  if (isLoggedIn && user && allowedRoles.includes(user.role)) {
     return <>{children}</>;
   }
 
-  return (
-    <div className="container mx-auto space-y-6 p-4 md:p-8">
-      <Skeleton className="h-40 w-full" />
-      <Skeleton className="h-64 w-full" />
-      <Skeleton className="h-64 w-full" />
-    </div>
-  );
+  return <AuthLoadingScreen />;
 }
