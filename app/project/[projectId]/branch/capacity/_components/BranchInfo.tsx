@@ -15,7 +15,7 @@ const BranchInfoComponent = ({ branch, idx }: BranchInfoProps) => {
   return (
     <div className="bg-card/50 flex h-full flex-col justify-between rounded-lg p-3">
       <div className="flex items-start justify-between gap-3">
-        <div className="bg-muted relative aspect-square w-16 flex-shrink-0 overflow-hidden rounded-md">
+        <div className="bg-muted relative aspect-square w-12 flex-shrink-0 overflow-hidden rounded-md">
           {hasImage ? (
             <Image
               src={branch.imageUrl}

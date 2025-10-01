@@ -65,8 +65,8 @@ const ShortageAccordionComponent = ({ shortageList }: ShortageAccordionProps) =>
                 ))}
               </div>
             </div>
-            <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[11px] font-semibold text-amber-400">
-              {shortageList.length}
+            <span className="truncate rounded-md bg-amber-500/20 px-2 py-0.5 text-xl font-extrabold text-amber-400">
+              총 {shortageList.length} 종류 부족
             </span>
           </AccordionTrigger>
           <AccordionContent className="border-t px-3 pt-2 pb-3">
