@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -13,6 +14,8 @@ import {
   Boxes,
   PackagePlus,
   ChartColumnBig,
+  Factory,
+  ClipboardList,
 } from 'lucide-react';
 
 type NavItem = {
@@ -20,6 +23,7 @@ type NavItem = {
   href?: string | null;
   icon?: LucideIcon;
   children?: NavItem[];
+  disabled?: boolean; // 비활성 상태를 위한 속성 추가
 };
 
 const normalize = (p?: string | null) =>
@@ -41,6 +45,20 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
       ],
     },
     {
+      label: '생산 관리',
+      icon: Factory,
+      children: [
+        { label: '분기 레일', href: `${base}/branch/capacity`, icon: ClipboardList },
+        // '직선 레일' 항목을 비활성화 처리
+        {
+          label: '직선 레일',
+          href: `${base}/straight/capacity`,
+          icon: ClipboardList,
+          disabled: true,
+        },
+      ],
+    },
+    {
       label: '자재 관리',
       href: `${base}/material`,
       icon: Boxes,
@@ -58,24 +76,16 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
     return !!h && (pathname === h || pathname.startsWith(h + '/'));
   };
 
-  // 섹션 활성화 규칙:
-  // - 개요(href === base): 정확히 일치할 때만 활성
-  // - 나머지: 하위 경로까지 포함해 활성
-  // - 링크 없는 섹션: 자식 중 하나가 활성일 때 활성
   const isSectionActive = (section: NavItem) => {
-    // 1. '개요'와 같이 최상위 경로 링크는 정확히 일치할 때만 활성
     if (section.href === base) {
       return isActiveExact(section.href);
     }
-    // 2. '자재 관리'와 같이 링크와 하위 메뉴를 모두 가진 경우, 정확히 일치할 때만 활성
     if (section.href && section.children && section.children.length > 0) {
       return isActiveExact(section.href);
     }
-    // 3. '프로젝트 관리'와 같이 링크는 없고 하위 메뉴만 있는 경우, 자식 중 하나가 활성이면 활성 (글자색 변경용)
     if (!section.href && section.children) {
       return section.children.some((c) => isActiveDeep(c.href));
     }
-    // 4. (미래를 위해) 하위 메뉴 없는 일반 링크는 하위 경로까지 포함하여 활성
     if (section.href) {
       return isActiveDeep(section.href);
     }
@@ -86,14 +96,12 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
     <nav className="bg-card rounded-xl border p-3">
       <ul className="flex flex-col gap-3">
         {nav.map((section) => {
-          // isSectionActive 함수 호출 방식을 section 객체 전체를 넘겨주도록 변경합니다.
           const sectionActive = isSectionActive(section);
 
           return (
             <li key={section.label}>
               {/* # 섹션 */}
               {section.href ? (
-                // "개요", "자재 관리" 등 href가 있는 항목
                 <Button
                   asChild
                   variant={sectionActive ? 'default' : 'ghost'}
@@ -127,7 +135,21 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
                     const childActive = isActiveDeep(child.href);
                     return (
                       <li key={child.label}>
-                        {child.href ? (
+                        {child.disabled ? (
+                          // 비활성화된 항목 렌더링
+                          <div
+                            className={cn(
+                              'text-muted-foreground flex w-full cursor-not-allowed items-center justify-between rounded-md px-2 py-1 text-sm opacity-70'
+                            )}
+                          >
+                            <div className="flex items-center">
+                              {child.icon && <child.icon className="mr-2 h-4 w-4" />}
+                              <span className="whitespace-nowrap">{child.label}</span>
+                            </div>
+                            <Badge variant="destructive">준비 중</Badge>
+                          </div>
+                        ) : child.href ? (
+                          // 활성화된 링크 렌더링
                           <Button
                             asChild
                             variant={childActive ? 'default' : 'ghost'}
@@ -143,6 +165,7 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
                             </Link>
                           </Button>
                         ) : (
+                          // 링크가 없는 텍스트 항목 렌더링
                           <div className="text-muted-foreground flex items-center gap-2 rounded-md px-2 py-1 text-sm">
                             {child.icon && <child.icon className="h-4 w-4" />}
                             <span className="whitespace-nowrap">{child.label}</span>
