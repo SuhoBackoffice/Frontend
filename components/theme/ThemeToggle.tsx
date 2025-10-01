@@ -19,8 +19,8 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label="테마 변경"
     >
-      <Sun className="h-6 w-6 scale-150 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-      <Moon className="absolute h-6 w-6 scale-0 rotate-90 transition-all dark:scale-150 dark:rotate-0" />
+      <Sun className="h-6 w-6 scale-200 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+      <Moon className="absolute h-6 w-6 scale-0 rotate-90 transition-all dark:scale-200 dark:rotate-0" />
     </Button>
   );
 }

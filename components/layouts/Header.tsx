@@ -51,7 +51,7 @@ export default function Header() {
           </div>
 
           {/* 네비게이션 파트 */}
-          <nav className="flex w-full items-center justify-start gap-8">
+          <nav className="flex w-full items-center justify-center gap-8">
             {navItems.map((item) => (
               <NavLink key={item.href} href={item.href} className="text-2xl font-bold">
                 {item.text}
@@ -59,7 +59,7 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-3">
             {/* 로그인 상태에 따른 버튼 관리 */}
             {isLoggedIn ? (
               <LogoutDialog />

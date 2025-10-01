@@ -44,7 +44,7 @@ export function LogoutDialog() {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="로그아웃">
-          <LogOut className="h-5 w-5 scale-150" />
+          <LogOut className="h-5 w-5 scale-200" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
