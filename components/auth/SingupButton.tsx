@@ -11,7 +11,7 @@ export function SignupButton() {
       <TooltipTrigger asChild>
         <Button asChild variant="ghost" size="icon" aria-label="회원가입">
           <Link href="/signup">
-            <UserPlus className="h-5 w-5 scale-150" />
+            <UserPlus className="h-5 w-5 scale-200" />
           </Link>
         </Button>
       </TooltipTrigger>

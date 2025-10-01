@@ -6,6 +6,7 @@ import {
   GetProjectListRequest,
   GetProjectDetailRequest,
   PostProjectStraightRequest,
+  GetProjectBranchCapacityRequest,
   //응답
   ProjectSearchSortResponse,
   ProjectInfoResponse,
@@ -16,6 +17,7 @@ import {
   PostProjectBranchRequest,
   PostProjectBranchRegisterResponse,
   PatchProjectBranchRequest,
+  GetProjectBranchCapacityResponse,
 } from '@/types/project/project.types';
 
 export async function postNewProject(data: NewProjectRequest): Promise<ApiResponse<null>> {
@@ -181,5 +183,19 @@ export function getProjectQuantityList(projectId: number): Promise<FileResponse>
   return fetchApi(`/project/${projectId}/quantity-list`, {
     method: 'GET',
     isBlob: true,
+  });
+}
+
+export function getProjectBranchCapacity(
+  data: GetProjectBranchCapacityRequest
+): Promise<ApiResponse<GetProjectBranchCapacityResponse[]>> {
+  const { projectId } = data;
+
+  return fetchApi<GetProjectBranchCapacityResponse[]>(`/project/${projectId}/branch/capacity`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 }

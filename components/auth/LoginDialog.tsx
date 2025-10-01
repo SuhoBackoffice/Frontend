@@ -47,7 +47,7 @@ export function LoginDialog() {
   return (
     <>
       <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)} aria-label="로그인">
-        <LogIn className="h-5 w-5 scale-150" />
+        <LogIn className="h-5 w-5 scale-200" />
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[425px]">
