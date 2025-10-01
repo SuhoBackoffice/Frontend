@@ -41,6 +41,10 @@ export interface PatchProjectBranchRequest {
   totalQuantity: number;
 }
 
+export interface GetProjectBranchCapacityRequest {
+  projectId: number;
+}
+
 // 응답
 export interface ProjectSearchSortResponse {
   id: string;
@@ -97,4 +101,21 @@ export interface LitzWireSupportInfo {
 
 export interface PostProjectBranchRegisterResponse {
   projectId: number;
+}
+
+export interface GetProjectBranchCapacityResponse {
+  imageUrl: string;
+  branchTypeId: number;
+  code: string;
+  name: string;
+  totalQuantity: number;
+  completedQuantity: number;
+  capacity: number;
+  branchBomShortageList: GetBranchBomShortageList[];
+}
+
+export interface GetBranchBomShortageList {
+  drawingNumber: string;
+  itemName: string;
+  shortage: number;
 }
