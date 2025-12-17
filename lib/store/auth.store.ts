@@ -1,19 +1,15 @@
-// lib/store/auth.store.ts
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { UserInfoResponse } from '@/types/user/user.types';
+import { LoginResponse } from '@/types/auth/auth.types';
 
 interface AuthState {
   isLoggedIn: boolean;
-  user: UserInfoResponse | null;
-  setLoggedIn: (isLoggedIn: boolean) => void;
-  setUser: (user: UserInfoResponse | null) => void;
-  logout: () => void;
+  user: LoginResponse | null;
   _hasHydrated: boolean;
-  setHasHydrated: (isHydrated: boolean) => void;
-  isSyncing: boolean;
-  setIsSyncing: (isSyncing: boolean) => void;
+
+  login: (user: LoginResponse) => void;
+  logout: () => void;
+  setHasHydrated: (hydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -22,12 +18,20 @@ export const useAuthStore = create<AuthState>()(
       isLoggedIn: false,
       user: null,
       _hasHydrated: false,
-      isSyncing: true,
-      setHasHydrated: (isHydrated) => set({ _hasHydrated: isHydrated }),
-      setIsSyncing: (isSyncing) => set({ isSyncing }),
-      setLoggedIn: (isLoggedIn) => set({ isLoggedIn }),
-      setUser: (user) => set({ user, isLoggedIn: !!user }),
-      logout: () => set({ isLoggedIn: false, user: null }),
+
+      login: (user) =>
+        set({
+          isLoggedIn: true,
+          user,
+        }),
+
+      logout: () =>
+        set({
+          isLoggedIn: false,
+          user: null,
+        }),
+
+      setHasHydrated: (hydrated) => set({ _hasHydrated: hydrated }),
     }),
     {
       name: 'auth-storage',
