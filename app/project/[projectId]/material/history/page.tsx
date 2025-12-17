@@ -1,4 +1,3 @@
-import AuthGuard from '@/components/auth/AuthGuard';
 import { getMaterialHistory } from '@/lib/api/material/material.api';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -33,10 +32,8 @@ export default async function ProjectMaterialHistroyPage({
   });
 
   return (
-    <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
-      <Suspense fallback={<ProjectMaterialHistoryMainLoading />}>
-        <ProjectMaterialHistoryMain promiseData={materialHistory} projectId={id} />
-      </Suspense>
-    </AuthGuard>
+    <Suspense fallback={<ProjectMaterialHistoryMainLoading />}>
+      <ProjectMaterialHistoryMain promiseData={materialHistory} projectId={id} />
+    </Suspense>
   );
 }

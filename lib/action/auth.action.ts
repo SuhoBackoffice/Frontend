@@ -1,6 +1,7 @@
 import { ApiError } from '@/types/api.types';
 import { postLogin } from '../api/auth/auth.api';
 import { z } from 'zod';
+import { LoginResponse } from '@/types/auth/auth.types';
 
 const loginSchema = z.object({
   loginId: z.string().min(1, { message: '아이디를 입력해 주세요.' }),
@@ -9,18 +10,22 @@ const loginSchema = z.object({
 
 export interface LoginFormState {
   message: string;
-  errors?: {
+  errors: {
     loginId?: string[];
     password?: string[];
   };
-  formData?: {
+  formData: {
     loginId: string;
     password: string;
   };
-  success?: boolean;
+  success: boolean;
+  user: LoginResponse | null;
 }
 
-export async function loginAction(prevState: LoginFormState, formData: FormData) {
+export async function loginAction(
+  prevState: LoginFormState,
+  formData: FormData
+): Promise<LoginFormState> {
   const rawFormData = {
     loginId: formData.get('loginId') as string,
     password: formData.get('password') as string,
@@ -34,12 +39,12 @@ export async function loginAction(prevState: LoginFormState, formData: FormData)
       errors: validatedFields.error.flatten().fieldErrors,
       formData: rawFormData,
       success: false,
+      user: null,
     };
   }
 
   try {
     const { loginId, password } = validatedFields.data;
-
     const response = await postLogin({ loginId, password });
 
     return {
@@ -47,6 +52,7 @@ export async function loginAction(prevState: LoginFormState, formData: FormData)
       errors: {},
       formData: { loginId: '', password: '' },
       success: true,
+      user: response.data,
     };
   } catch (e) {
     if (e instanceof ApiError) {
@@ -55,14 +61,16 @@ export async function loginAction(prevState: LoginFormState, formData: FormData)
         errors: {},
         formData: rawFormData,
         success: false,
-      };
-    } else {
-      return {
-        message: '서버 연결 상태가 좋지 않습니다. 다시 시도해 주세요.',
-        errors: {},
-        formData: rawFormData,
-        success: false,
+        user: null,
       };
     }
+
+    return {
+      message: '서버 연결 상태가 좋지 않습니다. 다시 시도해 주세요.',
+      errors: {},
+      formData: rawFormData,
+      success: false,
+      user: null,
+    };
   }
 }

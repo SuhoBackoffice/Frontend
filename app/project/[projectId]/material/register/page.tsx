@@ -1,4 +1,3 @@
-import AuthGuard from '@/components/auth/AuthGuard';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProjectMaterialRegisterComponent from './_components/ProjectMaterialRegisterComponent';
@@ -21,9 +20,5 @@ export default async function ProjectMaterialRegisterPage({
     notFound();
   }
 
-  return (
-    <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
-      <ProjectMaterialRegisterComponent projectId={id} />
-    </AuthGuard>
-  );
+  return <ProjectMaterialRegisterComponent projectId={id} />;
 }

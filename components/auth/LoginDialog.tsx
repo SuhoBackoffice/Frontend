@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { loginAction, LoginFormState } from '@/lib/action/auth.action'; // LoginFormState도 import
+import { loginAction, LoginFormState } from '@/lib/action/auth.action';
 import { useAuthStore } from '@/lib/store/auth.store';
 import { LogIn, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,11 +24,12 @@ const initialState: LoginFormState = {
   errors: {},
   formData: { loginId: '', password: '' },
   success: false,
+  user: null,
 };
 
 export function LoginDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
+  const { login } = useAuthStore();
   const [state, formAction, isPending] = useActionState<LoginFormState, FormData>(
     loginAction,
     initialState
@@ -36,13 +37,13 @@ export function LoginDialog() {
   const router = useRouter();
 
   useEffect(() => {
-    if (state.success) {
+    if (state.success && state.user) {
       toast.success(state.message);
-      setLoggedIn(true);
+      login(state.user);
       setIsOpen(false);
       router.push('/');
     }
-  }, [state.success, state.message, setLoggedIn, setIsOpen, router]);
+  }, [state.success, state.message, state.user, login, router]);
 
   return (
     <>
