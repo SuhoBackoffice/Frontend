@@ -1,6 +1,5 @@
 'use client';
 
-import AuthGuard from '@/components/auth/AuthGuard';
 import { getProjectDetail } from '@/lib/api/project/project.api';
 import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -279,7 +278,8 @@ export default function BranchRegisterComponent({ projectId }: Props) {
   };
 
   return (
-    <AuthGuard allowedRoles={['admin', '관리자']}>
+    // <AuthGuard allowedRoles={['admin', '관리자']}>
+    <>
       <div className="flex justify-center p-8">
         <Card className="w-full max-w-[1440px]">
           <CardHeader className="text-center">
@@ -578,6 +578,7 @@ export default function BranchRegisterComponent({ projectId }: Props) {
         title={`${branchCode}번 분기 BOM List`}
         description={`${branchCode}번 분기에 대한 자재 목록입니다.`}
       />
-    </AuthGuard>
+      {/* </AuthGuard> */}
+    </>
   );
 }

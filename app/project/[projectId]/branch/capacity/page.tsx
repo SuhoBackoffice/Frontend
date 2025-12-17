@@ -1,4 +1,3 @@
-import AuthGuard from '@/components/auth/AuthGuard';
 import { getProjectBranchCapacity } from '@/lib/api/project/project.api';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
@@ -22,10 +21,10 @@ export default async function BranchRailRegister({ params }: { params: Params })
   const projectBranchCapacity = getProjectBranchCapacity({ projectId: id });
 
   return (
-    <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
-      <Suspense fallback={<ProjectBranchCapacityMainLoading />}>
-        <ProjectBranchCapacityMain promiseData={projectBranchCapacity} projectId={id} />
-      </Suspense>
-    </AuthGuard>
+    // <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
+    <Suspense fallback={<ProjectBranchCapacityMainLoading />}>
+      <ProjectBranchCapacityMain promiseData={projectBranchCapacity} projectId={id} />
+    </Suspense>
+    // </AuthGuard>
   );
 }

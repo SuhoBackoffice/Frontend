@@ -4,7 +4,6 @@ import ProjectMaterialMain from './_components/ProjectMaterialMain';
 import { getMaterialSummary } from '@/lib/api/material/material.api';
 import { Suspense } from 'react';
 import ProjectMaterialMainLoading from './_components/ProjectMaterialMain.Loading';
-import AuthGuard from '@/components/auth/AuthGuard';
 
 type Params = Promise<{ projectId: string }>;
 
@@ -23,10 +22,10 @@ export default async function ProjectMaterialPage({ params }: { params: Params }
   }
 
   return (
-    <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
-      <Suspense fallback={<ProjectMaterialMainLoading />}>
-        <ProjectMaterialMain promiseData={materialSummary} projectId={id} />
-      </Suspense>
-    </AuthGuard>
+    // <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
+    <Suspense fallback={<ProjectMaterialMainLoading />}>
+      <ProjectMaterialMain promiseData={materialSummary} projectId={id} />
+    </Suspense>
+    // </AuthGuard>
   );
 }

@@ -11,7 +11,6 @@ import ProjectStraightDetailLoading from './_components/ProjectStraightDetail.Lo
 import ProjectBranchDetailLoading from './_components/ProjectBranchDetail.Loading';
 import { Suspense } from 'react';
 import ProjectInfoDetail from './_components/ProjectInfoDetail';
-import AuthGuard from '@/components/auth/AuthGuard';
 
 type Params = Promise<{ projectId: string }>;
 
@@ -32,7 +31,8 @@ export default async function ProjectDetail({ params }: { params: Params }) {
   const projectBranchDetailPromise = getProjectBranchDetail({ projectId: id });
 
   return (
-    <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
+    // <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
+    <>
       <div className="container mx-auto space-y-6">
         {/* 섹션 1: 기본 정보 */}
         <Suspense fallback={<ProjectInfoDetailLoading />}>
@@ -49,6 +49,7 @@ export default async function ProjectDetail({ params }: { params: Params }) {
           <ProjectBranchDetail promiseData={projectBranchDetailPromise} projectId={id} />
         </Suspense>
       </div>
-    </AuthGuard>
+      {/* </AuthGuard> */}
+    </>
   );
 }
