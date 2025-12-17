@@ -160,7 +160,6 @@ export default function ProjectPage() {
   const getSelectedSortName = () => sortOptions.find((s) => s.id === searchParams.sort)?.name;
 
   return (
-    // <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
     <>
       <div className="container mx-auto space-y-4 p-4 md:p-8">
         <div className="mb-8 text-center">

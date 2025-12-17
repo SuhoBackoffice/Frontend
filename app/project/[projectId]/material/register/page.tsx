@@ -20,9 +20,5 @@ export default async function ProjectMaterialRegisterPage({
     notFound();
   }
 
-  return (
-    // <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
-    <ProjectMaterialRegisterComponent projectId={id} />
-    // </AuthGuard>
-  );
+  return <ProjectMaterialRegisterComponent projectId={id} />;
 }

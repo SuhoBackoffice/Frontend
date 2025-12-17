@@ -63,7 +63,6 @@ export default function ProjectRegister() {
   }, [state.success, state.message, router]);
 
   return (
-    // <AuthGuard allowedRoles={['admin', '관리자']}>
     <div className="mx-auto max-w-2xl py-8">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight">새 프로젝트 등록</h1>
@@ -210,6 +209,5 @@ export default function ProjectRegister() {
         </Button>
       </form>
     </div>
-    // </AuthGuard>
   );
 }

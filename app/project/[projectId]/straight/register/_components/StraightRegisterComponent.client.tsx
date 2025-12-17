@@ -133,7 +133,6 @@ export default function StraightRegisterComponent({ projectId }: Props) {
   }, [state.success, state.message, router, projectId]);
 
   return (
-    // <AuthGuard allowedRoles={['admin', '관리자']}>
     <div className="container mx-auto max-w-4xl py-8">
       <form action={formAction}>
         <Card>
@@ -304,6 +303,5 @@ export default function StraightRegisterComponent({ projectId }: Props) {
         </Card>
       </form>
     </div>
-    // </AuthGuard>
   );
 }

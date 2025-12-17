@@ -22,10 +22,8 @@ export default async function ProjectMaterialPage({ params }: { params: Params }
   }
 
   return (
-    // <AuthGuard allowedRoles={['admin', '관리자', '직원']}>
     <Suspense fallback={<ProjectMaterialMainLoading />}>
       <ProjectMaterialMain promiseData={materialSummary} projectId={id} />
     </Suspense>
-    // </AuthGuard>
   );
 }

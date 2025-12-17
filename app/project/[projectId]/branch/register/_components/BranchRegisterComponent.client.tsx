@@ -278,7 +278,6 @@ export default function BranchRegisterComponent({ projectId }: Props) {
   };
 
   return (
-    // <AuthGuard allowedRoles={['admin', '관리자']}>
     <>
       <div className="flex justify-center p-8">
         <Card className="w-full max-w-[1440px]">
@@ -578,7 +577,6 @@ export default function BranchRegisterComponent({ projectId }: Props) {
         title={`${branchCode}번 분기 BOM List`}
         description={`${branchCode}번 분기에 대한 자재 목록입니다.`}
       />
-      {/* </AuthGuard> */}
     </>
   );
 }
