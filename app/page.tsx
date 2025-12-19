@@ -1,3 +1,9 @@
+import MainPageOnGoingProject from './_components/MainPageOnGoingProjectComponent';
+
 export default function Home() {
-  return <></>;
+  return (
+    <div className="container mx-auto space-y-6">
+      <MainPageOnGoingProject />
+    </div>
+  );
 }

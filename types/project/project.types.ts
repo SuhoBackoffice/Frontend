@@ -119,3 +119,12 @@ export interface GetBranchBomShortageList {
   itemName: string;
   shortage: number;
 }
+
+export interface GetProjectOnGoingList {
+  projectId: number;
+  version: string;
+  region: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+}

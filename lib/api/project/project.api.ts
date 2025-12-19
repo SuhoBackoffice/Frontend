@@ -18,6 +18,7 @@ import {
   PostProjectBranchRegisterResponse,
   PatchProjectBranchRequest,
   GetProjectBranchCapacityResponse,
+  GetProjectOnGoingList,
 } from '@/types/project/project.types';
 
 export async function postNewProject(data: NewProjectRequest): Promise<ApiResponse<null>> {
@@ -192,6 +193,16 @@ export function getProjectBranchCapacity(
   const { projectId } = data;
 
   return fetchApi<GetProjectBranchCapacityResponse[]>(`/project/${projectId}/branch/capacity`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getOnGoingProjectList(): Promise<ApiResponse<GetProjectOnGoingList[]>> {
+  return fetchApi<GetProjectOnGoingList[]>(`/project/ongoing`, {
     method: 'GET',
     credentials: 'include',
     headers: {
