@@ -6,14 +6,14 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LockKeyhole, Calendar, MapPin, ArrowRight, Tag } from 'lucide-react';
+import { LockKeyhole, Calendar, MapPin, ArrowRight, Tag, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/auth.store';
 import { GetProjectOnGoingList } from '@/types/project/project.types';
 import { getOnGoingProjectList } from '@/lib/api/project/project.api';
 
 export default function MainPageOnGoingProject() {
-  const { isLoggedIn, _hasHydrated } = useAuthStore();
+  const { isLoggedIn, _hasHydrated, user } = useAuthStore();
   const [projects, setProjects] = useState<GetProjectOnGoingList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -116,16 +116,32 @@ export default function MainPageOnGoingProject() {
                             </div>
                           </div>
 
-                          <Button
-                            asChild
-                            size="lg"
-                            className="shadow-primary/20 w-full rounded-full px-8 py-6 text-lg shadow-lg transition-all hover:scale-105 md:w-fit"
-                          >
-                            <Link href={`/project/${project.projectId}`}>
-                              프로젝트 상세
-                              <ArrowRight className="ml-2 h-5 w-5" />
-                            </Link>
-                          </Button>
+                          <div className="flex flex-col gap-2 md:flex-row">
+                            <Button
+                              asChild
+                              size="sm"
+                              className="shadow-primary/20 w-full py-6 text-lg shadow-lg transition-all hover:scale-105 md:w-fit"
+                            >
+                              <Link href={`/project/${project.projectId}`}>
+                                <ArrowRight className="ml-2 h-5 w-5" />
+                                상세 페이지
+                              </Link>
+                            </Button>
+
+                            <Button
+                              asChild
+                              size="sm"
+                              className="shadow-primary/20 w-full py-6 text-lg shadow-lg transition-all hover:scale-105 md:w-fit"
+                            >
+                              <Link
+                                aria-disabled
+                                href={`/project/${project.projectId}/reports/new`}
+                              >
+                                <FileText className="ml-2 h-5 w-5" />
+                                업무 보고
+                              </Link>
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
