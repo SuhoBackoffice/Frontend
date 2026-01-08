@@ -16,7 +16,10 @@ import {
   ChartColumnBig,
   Factory,
   ClipboardList,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
+import { useState } from 'react';
 
 type NavItem = {
   label: string;
@@ -33,6 +36,7 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
   const rawPath = usePathname();
   const pathname = normalize(rawPath);
   const base = `/project/${projectId}`;
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const nav: NavItem[] = [
     { label: '개요', href: `${base}`, icon: LayoutDashboard },
@@ -93,83 +97,92 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
   };
 
   return (
-    <nav className="bg-card rounded-xl border p-3">
-      <ul className="flex flex-col gap-3">
+    <nav
+      className={cn(
+        'bg-card relative flex h-full flex-col rounded-xl border p-3 shadow-sm transition-all duration-300 ease-in-out',
+        isCollapsed ? 'w-[70px]' : 'w-[240px]'
+      )}
+    >
+      {/* 축소/확장 토글 버튼 */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="hover:bg-accent bg-background absolute top-6 -right-3 z-10 h-6 w-6 rounded-full border shadow-sm"
+      >
+        {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+      </Button>
+
+      <ul className="flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto">
         {nav.map((section) => {
           const sectionActive = isSectionActive(section);
 
           return (
-            <li key={section.label}>
-              {/* # 섹션 */}
+            <li key={section.label} className="group">
+              {/* # 섹션 헤더 */}
               {section.href ? (
                 <Button
                   asChild
                   variant={sectionActive ? 'default' : 'ghost'}
                   className={cn(
-                    'w-full justify-start rounded-lg px-3 py-2 text-left text-lg font-semibold',
-                    sectionActive && 'opacity-80'
+                    'w-full justify-start rounded-lg px-3 py-2 text-left text-lg font-semibold transition-all',
+                    isCollapsed && 'justify-center px-0'
                   )}
-                  aria-current={sectionActive ? 'page' : undefined}
                 >
                   <Link href={section.href}>
-                    {section.icon && <section.icon className="mr-2 h-5 w-5" />}
-                    <span className="whitespace-nowrap">{section.label}</span>
+                    {section.icon && (
+                      <section.icon className={cn('h-5 w-5', !isCollapsed && 'mr-2')} />
+                    )}
+                    {!isCollapsed && (
+                      <span className="animate-in fade-in slide-in-from-left-2">
+                        {section.label}
+                      </span>
+                    )}
                   </Link>
                 </Button>
               ) : (
                 <div
                   className={cn(
                     'flex items-center gap-2 px-2 py-1 text-lg font-semibold',
-                    sectionActive ? 'text-primary' : 'text-foreground'
+                    sectionActive ? 'text-primary' : 'text-foreground',
+                    isCollapsed && 'justify-center px-0'
                   )}
                 >
                   {section.icon && <section.icon className="h-5 w-5" />}
-                  <span className="whitespace-nowrap">{section.label}</span>
+                  {!isCollapsed && (
+                    <span className="animate-in fade-in slide-in-from-left-2">{section.label}</span>
+                  )}
                 </div>
               )}
 
-              {/* ## 하위 항목 */}
-              {section.children && section.children.length > 0 && (
-                <ul className="mt-2 space-y-1 border-l pl-4">
+              {/* ## 하위 항목 (축소 시에는 숨김) */}
+              {!isCollapsed && section.children && section.children.length > 0 && (
+                <ul className="animate-in fade-in zoom-in-95 mt-2 space-y-1 border-l pl-4">
                   {section.children.map((child) => {
                     const childActive = isActiveDeep(child.href);
                     return (
                       <li key={child.label}>
                         {child.disabled ? (
-                          // 비활성화된 항목 렌더링
-                          <div
-                            className={cn(
-                              'text-muted-foreground flex w-full cursor-not-allowed items-center justify-between rounded-md px-2 py-1 text-sm opacity-70'
-                            )}
-                          >
+                          <div className="text-muted-foreground flex w-full cursor-not-allowed items-center justify-between rounded-md px-2 py-1 text-sm opacity-70">
                             <div className="flex items-center">
                               {child.icon && <child.icon className="mr-2 h-4 w-4" />}
                               <span className="whitespace-nowrap">{child.label}</span>
                             </div>
-                            <Badge variant="destructive">준비 중</Badge>
+                            <Badge variant="destructive" className="origin-right scale-75">
+                              준비 중
+                            </Badge>
                           </div>
-                        ) : child.href ? (
-                          // 활성화된 링크 렌더링
+                        ) : (
                           <Button
                             asChild
                             variant={childActive ? 'default' : 'ghost'}
-                            className={cn(
-                              'w-full justify-start rounded-md px-2 py-1 text-sm',
-                              childActive && 'opacity-80'
-                            )}
-                            aria-current={childActive ? 'page' : undefined}
+                            className="w-full justify-start rounded-md px-2 py-1 text-sm"
                           >
-                            <Link href={child.href}>
+                            <Link href={child.href!}>
                               {child.icon && <child.icon className="mr-2 h-4 w-4" />}
                               <span className="whitespace-nowrap">{child.label}</span>
                             </Link>
                           </Button>
-                        ) : (
-                          // 링크가 없는 텍스트 항목 렌더링
-                          <div className="text-muted-foreground flex items-center gap-2 rounded-md px-2 py-1 text-sm">
-                            {child.icon && <child.icon className="h-4 w-4" />}
-                            <span className="whitespace-nowrap">{child.label}</span>
-                          </div>
                         )}
                       </li>
                     );
@@ -180,6 +193,13 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
           );
         })}
       </ul>
+
+      {/* 사이드바 하단 정보 (옵션) */}
+      {!isCollapsed && (
+        <div className="text-muted-foreground animate-in fade-in mt-auto border-t px-2 pt-4 text-[10px]">
+          © 2026 SUHO Project Management
+        </div>
+      )}
     </nav>
   );
 }

@@ -14,13 +14,14 @@ export default async function ProjectLayout({
   const id = Number(projectId);
 
   return (
-    <div className="min-h-dvh">
-      {/* 좌측 사이드바 + 우측 본문 그리드 */}
-      <div className="container mx-auto p-4 md:p-8 lg:grid lg:grid-cols-[240px_1fr] lg:gap-6">
-        <aside className="mb-6 lg:sticky lg:top-[calc(var(--sticky-top))] lg:mb-0 lg:max-h-[calc(100dvh-var(--header-height)-24px)] lg:self-start lg:overflow-y-auto">
-          <ProjectSidenav projectId={id} />
+    <div className="flex min-h-dvh flex-col">
+      <div className="container mx-auto flex flex-1 flex-col p-4 md:p-8 lg:grid lg:grid-cols-[auto_1fr] lg:items-stretch lg:gap-6">
+        <aside className="mb-6 lg:mb-0">
+          <div className="lg:sticky lg:top-[calc(var(--sticky-top,2rem))] lg:h-[calc(100dvh-var(--header-height,4rem)-4rem)]">
+            <ProjectSidenav projectId={id} />
+          </div>
         </aside>
-        <main className="space-y-6">{children}</main>
+        <main className="flex-1 space-y-6">{children}</main>
       </div>
     </div>
   );
