@@ -52,7 +52,7 @@ export default function MainPageOnGoingProject() {
   return (
     <section className="py-12">
       <div className="mb-4 flex flex-col items-center text-center">
-        <h2 className="from-foreground via-primary to-foreground bg-gradient-to-r bg-clip-text pb-2 text-4xl font-black tracking-tighter text-transparent md:text-5xl">
+        <h2 className="from-foreground via-primary to-foreground bg-gradient-to-r bg-clip-text pb-2 text-4xl font-black tracking-tighter text-transparent md:text-4xl">
           진행 중인 프로젝트
         </h2>
         <div className="bg-primary mt-4 mb-4 h-1 w-20 rounded-full" />
@@ -69,7 +69,7 @@ export default function MainPageOnGoingProject() {
             {projects.length > 0 ? (
               projects.map((project) => (
                 <CarouselItem key={project.projectId}>
-                  <Card className="bg-card overflow-hidden !rounded-none !border-none !p-0 shadow-2xl transition-colors duration-300">
+                  <Card className="bg-card overflow-hidden !rounded-2xl !border-none !p-0 !shadow-none transition-colors duration-300">
                     <CardContent className="p-0">
                       <div className="flex h-full flex-col md:flex-row">
                         <div className="from-primary to-primary/80 text-primary-foreground flex w-full flex-col gap-8 bg-gradient-to-br p-10 md:w-1/4">
@@ -149,9 +149,11 @@ export default function MainPageOnGoingProject() {
                 </CarouselItem>
               ))
             ) : (
-              <div className="text-muted-foreground border-muted w-full rounded-3xl border-2 border-dashed py-20 text-center">
-                현재 진행 중인 프로젝트가 없습니다.
-              </div>
+              <CarouselItem>
+                <div className="text-muted-foreground border-muted w-full rounded-3xl border-2 border-dashed py-20 text-center !text-2xl">
+                  현재 진행 중인 프로젝트가 없습니다.
+                </div>
+              </CarouselItem>
             )}
           </CarouselContent>
         </Carousel>
@@ -163,49 +165,54 @@ export default function MainPageOnGoingProject() {
 function OnGoingProjectBlurOverlay() {
   return (
     <section className="py-12">
-      <div className="mb-8 flex flex-col items-center text-center opacity-60">
-        <h2 className="text-foreground text-4xl font-black tracking-tighter md:text-5xl">
+      {/* 헤더 부분: 메인과 동일한 그라데이션 적용 */}
+      <div className="mb-4 flex flex-col items-center text-center">
+        <h2 className="from-foreground via-primary to-foreground bg-gradient-to-r bg-clip-text pb-2 text-4xl font-black tracking-tighter text-transparent md:text-4xl">
           진행 중인 프로젝트
         </h2>
-        <div className="bg-primary mt-4 h-1 w-20 rounded-full" />
+        <div className="bg-primary mt-4 mb-4 h-1 w-20 rounded-full" />
       </div>
 
       <div className="mx-auto max-w-4xl px-4">
-        <div className="bg-card overflow-hidden rounded-2xl shadow-2xl">
+        {/* 카드 스타일 동기화: !rounded-2xl, shadow-none 제거 후 메인 스타일 반영 */}
+        <div className="bg-card overflow-hidden rounded-2xl border-none shadow-none">
           <div className="flex flex-col md:flex-row">
-            <div className="from-primary/80 to-primary/60 text-primary-foreground flex w-full flex-col gap-8 bg-gradient-to-br p-10 opacity-70 md:w-1/4">
+            {/* 왼쪽 영역: 메인과 동일한 그라데이션 및 패딩 */}
+            <div className="from-primary to-primary/80 text-primary-foreground flex w-full flex-col gap-8 bg-gradient-to-br p-10 opacity-70 md:w-1/4">
               <div>
-                <p className="mb-1 text-sm tracking-widest text-white/60 uppercase">Version</p>
-                <div className="h-6 w-20 rounded bg-white/20" />
+                <p className="mb-1 text-sm tracking-widest text-white/70 uppercase">Version</p>
+                <div className="h-8 w-16 animate-pulse rounded-lg bg-white/20" />
               </div>
 
               <div>
-                <p className="mb-1 text-sm tracking-widest text-white/60 uppercase">Region</p>
-                <div className="h-6 w-24 rounded bg-white/20" />
+                <p className="mb-1 text-sm tracking-widest text-white/70 uppercase">Region</p>
+                <div className="h-8 w-20 animate-pulse rounded-lg bg-white/20" />
               </div>
             </div>
 
-            <div className="bg-card flex w-full flex-col justify-center gap-6 p-10 md:w-3/4">
-              <div className="text-primary flex items-center gap-3">
-                <LockKeyhole className="h-6 w-6" />
-                <span className="text-sm font-semibold tracking-wider uppercase">
-                  Project Detail
-                </span>
+            {/* 오른쪽 영역: 메인과 동일한 레이아웃 및 'Project Detail' 라인 적용 */}
+            <div className="bg-card flex w-full flex-col justify-center p-10 md:w-3/4">
+              <div className="text-primary mb-3 flex items-center text-sm font-semibold tracking-wider uppercase">
+                <span className="bg-primary mr-3 h-px w-8" />
+                <LockKeyhole className="mr-2 h-4 w-4" />
+                Project Detail
               </div>
 
-              <h3 className="text-foreground text-2xl font-extrabold">회원 전용 콘텐츠</h3>
+              <h3 className="text-foreground mb-4 text-3xl leading-tight font-extrabold">
+                회원 전용 콘텐츠
+              </h3>
 
               <p className="text-muted-foreground max-w-md leading-relaxed">
-                진행 중인 프로젝트의 상세 정보는
+                진행 중인 프로젝트의 상세 정보는 보안을 위해
                 <br />
-                보안을 위해 로그인한 사용자에게만 공개됩니다.
+                로그인한 사용자에게만 공개됩니다.
                 <br />
-                우측 상단 로그인 버튼을 통해 로그인 해주세요.
+                우측 상단 버튼을 통해 로그인 해주세요.
               </p>
 
-              <div className="mt-4 flex items-center gap-3 opacity-40">
-                <Calendar className="h-5 w-5" />
-                <div className="bg-muted h-5 w-40 rounded" />
+              <div className="mt-8 flex items-center gap-3 opacity-30">
+                <Calendar className="text-primary h-5 w-5" />
+                <div className="bg-muted h-5 w-48 rounded-full" />
               </div>
             </div>
           </div>
@@ -217,11 +224,45 @@ function OnGoingProjectBlurOverlay() {
 
 function ProjectSkeleton() {
   return (
-    <div className="mx-auto max-w-4xl space-y-8 px-4 py-16">
-      <div className="flex flex-col items-center space-y-4">
+    <section className="py-12">
+      {/* 헤더 스켈레톤 */}
+      <div className="mb-4 flex flex-col items-center text-center">
         <Skeleton className="h-12 w-64 rounded-full" />
+        <Skeleton className="mt-6 h-1 w-20 rounded-full" />
       </div>
-      <Skeleton className="h-80 w-full rounded-3xl" />
-    </div>
+
+      <div className="mx-auto max-w-4xl px-4">
+        <div className="bg-card flex flex-col overflow-hidden rounded-2xl md:flex-row">
+          {/* 왼쪽 영역 스켈레톤 (1/4) */}
+          <div className="bg-primary/10 flex w-full flex-col gap-8 p-10 md:w-1/4">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-8 w-20" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-8 w-24" />
+            </div>
+          </div>
+
+          {/* 오른쪽 영역 스켈레톤 (3/4) */}
+          <div className="flex w-full flex-col justify-center p-10 md:w-3/4">
+            <div className="mb-4 flex items-center gap-3">
+              <Skeleton className="h-px w-8" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <Skeleton className="mb-6 h-10 w-3/4" />
+            <div className="mb-8 flex items-center gap-4">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-8 w-16 rounded-full" />
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-12 w-32 rounded-md" />
+              <Skeleton className="h-12 w-32 rounded-md" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
