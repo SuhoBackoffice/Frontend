@@ -18,6 +18,9 @@ import {
   ClipboardList,
   ChevronRight,
   ChevronLeft,
+  FilePlus,
+  FileText,
+  FileStack,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -26,7 +29,7 @@ type NavItem = {
   href?: string | null;
   icon?: LucideIcon;
   children?: NavItem[];
-  disabled?: boolean; // 비활성 상태를 위한 속성 추가
+  disabled?: boolean;
 };
 
 const normalize = (p?: string | null) =>
@@ -41,6 +44,14 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
   const nav: NavItem[] = [
     { label: '개요', href: `${base}`, icon: LayoutDashboard },
     {
+      label: '업무 보고',
+      icon: FileStack,
+      children: [
+        { label: '새 보고서 작성', href: `${base}/reports/new`, icon: FilePlus },
+        { label: '보고 내역 조회', href: `${base}/reports`, icon: FileText },
+      ],
+    },
+    {
       label: '프로젝트 관리',
       icon: Settings2,
       children: [
@@ -53,7 +64,6 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
       icon: Factory,
       children: [
         { label: '분기 레일', href: `${base}/branch/capacity`, icon: ClipboardList },
-        // '직선 레일' 항목을 비활성화 처리
         {
           label: '직선 레일',
           href: `${base}/straight/capacity`,
@@ -80,18 +90,18 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
     return !!h && (pathname === h || pathname.startsWith(h + '/'));
   };
 
-  const isSectionActive = (section: NavItem) => {
+  /**
+   * 섹션(부모)의 활성화 여부를 결정하는 로직
+   */
+  const isContentActive = (section: NavItem) => {
     if (section.href === base) {
       return isActiveExact(section.href);
     }
-    if (section.href && section.children && section.children.length > 0) {
-      return isActiveExact(section.href);
+    if (section.href && isActiveDeep(section.href)) {
+      return true;
     }
-    if (!section.href && section.children) {
-      return section.children.some((c) => isActiveDeep(c.href));
-    }
-    if (section.href) {
-      return isActiveDeep(section.href);
+    if (section.children) {
+      return section.children.some((child) => isActiveDeep(child.href));
     }
     return false;
   };
@@ -103,7 +113,6 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
         isCollapsed ? 'w-[70px]' : 'w-[240px]'
       )}
     >
-      {/* 축소/확장 토글 버튼 */}
       <Button
         variant="ghost"
         size="icon"
@@ -115,18 +124,19 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
 
       <ul className="flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto">
         {nav.map((section) => {
-          const sectionActive = isSectionActive(section);
+          const isExact = isActiveExact(section.href);
+          const isHighlight = isContentActive(section);
 
           return (
             <li key={section.label} className="group">
-              {/* # 섹션 헤더 */}
               {section.href ? (
                 <Button
                   asChild
-                  variant={sectionActive ? 'default' : 'ghost'}
+                  variant={isExact ? 'default' : 'ghost'}
                   className={cn(
                     'w-full justify-start rounded-lg px-3 py-2 text-left text-lg font-semibold transition-all',
-                    isCollapsed && 'justify-center px-0'
+                    isCollapsed && 'justify-center px-0',
+                    !isExact && isHighlight && 'text-primary hover:text-primary hover:bg-accent'
                   )}
                 >
                   <Link href={section.href}>
@@ -143,8 +153,8 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
               ) : (
                 <div
                   className={cn(
-                    'flex items-center gap-2 px-2 py-1 text-lg font-semibold',
-                    sectionActive ? 'text-primary' : 'text-foreground',
+                    'flex items-center gap-2 px-2 py-1 text-lg font-semibold transition-colors',
+                    isHighlight ? 'text-primary' : 'text-foreground',
                     isCollapsed && 'justify-center px-0'
                   )}
                 >
@@ -155,11 +165,10 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
                 </div>
               )}
 
-              {/* ## 하위 항목 (축소 시에는 숨김) */}
               {!isCollapsed && section.children && section.children.length > 0 && (
                 <ul className="animate-in fade-in zoom-in-95 mt-2 space-y-1 border-l pl-4">
                   {section.children.map((child) => {
-                    const childActive = isActiveDeep(child.href);
+                    const childActive = isActiveExact(child.href);
                     return (
                       <li key={child.label}>
                         {child.disabled ? (
@@ -176,7 +185,10 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
                           <Button
                             asChild
                             variant={childActive ? 'default' : 'ghost'}
-                            className="w-full justify-start rounded-md px-2 py-1 text-sm"
+                            className={cn(
+                              'w-full justify-start rounded-md px-2 py-1 text-sm transition-colors',
+                              childActive && 'opacity-90 shadow-sm'
+                            )}
                           >
                             <Link href={child.href!}>
                               {child.icon && <child.icon className="mr-2 h-4 w-4" />}
@@ -194,7 +206,6 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
         })}
       </ul>
 
-      {/* 사이드바 하단 정보 (옵션) */}
       {!isCollapsed && (
         <div className="text-muted-foreground animate-in fade-in mt-auto border-t px-2 pt-4 text-[10px]">
           © 2026 SUHO Project Management
