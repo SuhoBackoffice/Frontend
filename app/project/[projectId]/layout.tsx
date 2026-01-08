@@ -14,10 +14,15 @@ export default async function ProjectLayout({
   const id = Number(projectId);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-slate-50/30">
-      <header className="bg-background sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 lg:hidden">
+    <div className="flex min-h-dvh flex-col">
+      <header className="bg-background sticky top-0 z-30 flex h-14 items-center gap-2 border-b px-4 lg:hidden">
         <MobileProjectNav projectId={id} />
-        <span className="text-sm font-bold tracking-tight">프로젝트 관리 시스템</span>
+        <div className="flex flex-col items-start -space-y-1">
+          <span className="text-primary text-[10px] font-bold tracking-widest uppercase">
+            Project #{id}
+          </span>
+          <span className="text-base font-bold tracking-tight">SUHO Production</span>
+        </div>
       </header>
 
       <div className="container mx-auto flex flex-1 flex-col p-4 md:p-8 lg:grid lg:grid-cols-[auto_1fr] lg:items-stretch lg:gap-8">
