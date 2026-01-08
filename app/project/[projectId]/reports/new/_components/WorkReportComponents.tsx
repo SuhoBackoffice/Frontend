@@ -1,42 +1,42 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+
 import { getReportableBranchList, getReportableStraightList } from '@/lib/api/work/report.api';
 import { createWorkReportAction } from '@/lib/action/report.action';
-import RailReportSection from './RailReportSection';
-
-import type {
-  GetReportableStraightResponse,
-  GetReportableBranchResponse,
-  StraightWorkReportRequest,
-  BranchWorkReportRequest,
-} from '@/types/work/report.types';
 import BasicInfoSection from './BasicInfoSection';
+import RailReportSection from './RailReportSection';
 
 export default function WorkReportComponents({ projectId }: { projectId: number }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [errors, setErrors] = useState<any>(null);
 
-  // 1. 기본 정보 상태
   const [workSummary, setWorkSummary] = useState('');
   const [workDate, setWorkDate] = useState(new Date().toISOString().split('T')[0]);
+  const [availStraights, setAvailStraights] = useState<any[]>([]);
+  const [availBranches, setAvailBranches] = useState<any[]>([]);
+  const [straightReports, setStraightReports] = useState<any[]>([]);
+  const [branchReports, setBranchReports] = useState<any[]>([]);
 
-  // 2. 가용 레일 목록
-  const [availStraights, setAvailStraights] = useState<GetReportableStraightResponse[]>([]);
-  const [availBranches, setAvailBranches] = useState<GetReportableBranchResponse[]>([]);
-
-  // 3. 보고서 데이터 리스트
-  const [straightReports, setStraightReports] = useState<StraightWorkReportRequest[]>([]);
-  const [branchReports, setBranchReports] = useState<BranchWorkReportRequest[]>([]);
-
-  // 초기 가용 목록 데이터 로딩
   useEffect(() => {
     Promise.all([getReportableStraightList(projectId), getReportableBranchList(projectId)]).then(
       ([resS, resB]) => {
@@ -46,17 +46,10 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
     );
   }, [projectId]);
 
-  // 제출 핸들러
   const handleSubmit = async () => {
     if (isSubmitting) return;
     setErrors(null);
     setIsSubmitting(true);
-
-    if (straightReports.length === 0 && branchReports.length === 0) {
-      toast.error('직선 레일 혹은 분기 레일 항목을 최소 하나 이상 추가해 주세요.');
-      setIsSubmitting(false);
-      return;
-    }
 
     const payload = {
       workSummary,
@@ -67,7 +60,6 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
 
     try {
       const result = await createWorkReportAction(projectId, payload);
-
       if (result.success) {
         toast.success('업무 보고가 완료되었습니다.');
         router.push(`/project/${projectId}/reports`);
@@ -83,12 +75,34 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
       toast.error('서버와의 통신에 실패했습니다.');
     } finally {
       setIsSubmitting(false);
+      setIsConfirmOpen(false);
     }
   };
 
+  const getReportSummary = () => {
+    const summary: string[] = [];
+
+    if (straightReports.length > 0) {
+      const details = straightReports.map((r) => {
+        const info = availStraights.find((a) => a.projectStraightId === r.projectStraightId);
+        return `${info?.straightSerial} (${r.projectStraightSerialIdList.length}개)`;
+      });
+      summary.push(`직선 레일: ${details.join(', ')}`);
+    }
+
+    if (branchReports.length > 0) {
+      const details = branchReports.map((r) => {
+        const info = availBranches.find((a) => a.projectBranchId === r.projectBranchId);
+        return `${info?.branchSerial} (${r.projectBranchSerialIdList.length}개)`;
+      });
+      summary.push(`분기 레일: ${details.join(', ')}`);
+    }
+
+    return summary;
+  };
+
   return (
-    <div className="animate-in fade-in mx-auto space-y-8 pb-32 duration-500">
-      {/* 분리된 기본 정보 섹션 */}
+    <div className="animate-in fade-in space-y- mx-auto pb-32 duration-500">
       <BasicInfoSection
         workDate={workDate}
         setWorkDate={setWorkDate}
@@ -97,7 +111,6 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
         errors={errors}
       />
 
-      {/* 직선 레일 보고 섹션 */}
       <RailReportSection
         title="직선 레일 보고"
         type="straight"
@@ -108,7 +121,6 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
         errors={errors}
       />
 
-      {/* 분기 레일 보고 섹션 */}
       <RailReportSection
         title="분기 레일 보고"
         type="branch"
@@ -119,26 +131,55 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
         errors={errors}
       />
 
-      {/* 고정 하단 제출 바 */}
       <div className="sticky bottom-8 z-20 flex justify-end px-4 drop-shadow-lg">
-        <Button
-          size="lg"
-          disabled={isSubmitting}
-          className={cn(
-            'h-14 px-10 text-lg font-bold shadow-2xl transition-all hover:scale-105 active:scale-95',
-            'shadow-primary/20'
-          )}
-          onClick={handleSubmit}
-        >
-          {isSubmitting ? (
-            <span className="flex items-center gap-2">제출 중...</span>
-          ) : (
-            <>
+        <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="lg"
+              disabled={
+                isSubmitting || (straightReports.length === 0 && branchReports.length === 0)
+              }
+              className={cn(
+                'shadow-primary/20 h-14 px-10 text-lg font-bold shadow-2xl transition-all hover:scale-105 active:scale-95'
+              )}
+            >
               <CheckCircle2 className="mr-2 h-6 w-6" />
               보고서 제출하기
-            </>
-          )}
-        </Button>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="rounded-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl font-bold">
+                보고서를 제출하시겠습니까?
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="text-muted-foreground space-y-2 text-base">
+                  <div className="bg-muted/50 my-4 rounded-xl border border-dashed p-4">
+                    <p className="text-foreground mb-2 text-sm font-bold">보고 항목 요약</p>
+                    <ul className="list-inside list-disc space-y-1 text-sm">
+                      {getReportSummary().map((line, i) => (
+                        <li key={i}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <p>제출 후 관리자의 승인이 필요합니다.</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4">
+              <AlertDialogCancel className="h-11 rounded-xl font-semibold">취소</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSubmit();
+                }}
+                className="bg-primary hover:bg-primary/90 h-11 rounded-xl font-bold"
+              >
+                확인 및 제출
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

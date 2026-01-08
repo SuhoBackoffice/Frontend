@@ -30,13 +30,11 @@ export default function BasicInfoSection({
   return (
     <Card
       className={cn(
-        'border-muted/60 overflow-hidden shadow-sm transition-all duration-300',
-        errors?.workSummary
-          ? 'border-destructive/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]'
-          : 'hover:shadow-md'
+        'overflow-hidden border-none bg-transparent shadow-none',
+        errors?.workSummary ? 'border-destructive/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : ''
       )}
     >
-      <CardHeader>
+      <CardHeader className="px-0">
         <CardTitle className="flex items-center gap-3 text-xl font-bold tracking-tight">
           <div className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-lg">
             <CheckCircle2 className="h-5 w-5" />
@@ -45,7 +43,7 @@ export default function BasicInfoSection({
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="px-0 pt-0">
         <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-12">
           <div className="space-y-2 md:col-span-3">
             <Label className="text-muted-foreground ml-1 text-base font-bold">보고 일자</Label>
@@ -99,7 +97,7 @@ export default function BasicInfoSection({
 
             <Textarea
               id="summary"
-              placeholder={'특이 사항을 적어주세요. 없으면 공백 가능 ✔'}
+              placeholder={'특이 사항을 적어주세요.\n없다면 공백 ✔'}
               className={cn(
                 'border-muted-foreground/20 min-h-[110px] resize-none p-3 text-base leading-relaxed transition-all',
                 'focus-visible:ring-primary/30 focus-visible:border-primary bg-background',
