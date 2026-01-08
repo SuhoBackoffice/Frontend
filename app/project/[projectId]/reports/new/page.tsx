@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import WorkReportComponents from './_components/WorkReportComponents';
 
 type Params = Promise<{ projectId: string }>;
 
@@ -15,10 +16,5 @@ export default async function ProjectWorkReportPage({ params }: { params: Params
     notFound();
   }
 
-  return (
-    <div>test</div>
-    // <Suspense fallback={<ProjectMaterialMainLoading />}>
-    //   <ProjectMaterialMain promiseData={materialSummary} projectId={id} />
-    // </Suspense>
-  );
+  return <WorkReportComponents projectId={id} />;
 }

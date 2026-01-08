@@ -37,6 +37,7 @@ export async function postProjectWorkReport(
   projectId: number,
   data: PostWorkReportRequest
 ): Promise<ApiResponse<PostWorkReportResponse>> {
+  console.log('data : ' + data);
   return fetchApi<PostWorkReportResponse>(`/work/report/project/${projectId}`, {
     method: 'POST',
     body: JSON.stringify(data),

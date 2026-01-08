@@ -48,7 +48,7 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
       icon: FileStack,
       children: [
         { label: '새 보고서 작성', href: `${base}/reports/new`, icon: FilePlus },
-        { label: '보고 내역 조회', href: `${base}/reports`, icon: FileText },
+        { label: '보고 목록 조회', href: `${base}/reports`, icon: FileText },
       ],
     },
     {
