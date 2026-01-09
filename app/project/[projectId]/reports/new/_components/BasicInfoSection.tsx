@@ -64,7 +64,7 @@ export default function BasicInfoSection({
                   <CalendarIcon className="text-primary h-4 w-4 opacity-80" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="z-50 w-auto border bg-white p-0 shadow-xl" align="start">
+              <PopoverContent className="z-50 w-auto border p-0 shadow-xl" align="start">
                 <Calendar
                   mode="single"
                   selected={workDate ? new Date(workDate) : undefined}
