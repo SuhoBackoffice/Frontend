@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard,
   Settings2,
@@ -28,6 +29,20 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 const normalize = (p?: string | null) =>
   !p ? '' : p !== '/' && p.endsWith('/') ? p.slice(0, -1) : p;
 
+interface NavChildItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  disabled?: boolean;
+}
+
+interface NavSection {
+  label: string;
+  href?: string;
+  icon?: LucideIcon;
+  children?: NavChildItem[];
+}
+
 function NavContent({
   projectId,
   isCollapsed = false,
@@ -41,7 +56,7 @@ function NavContent({
   const pathname = normalize(rawPath);
   const base = `/project/${projectId}`;
 
-  const nav = [
+  const nav: NavSection[] = [
     { label: '개요', href: `${base}`, icon: LayoutDashboard },
     {
       label: '업무 보고',
