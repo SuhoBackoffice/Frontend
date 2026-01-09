@@ -109,7 +109,15 @@ export async function updateWorkReportStatusAction(
   }
 
   try {
-    const response = await postWorkReportStatus(reportId, formData);
+    const { status, rejectReason } = validated.data;
+
+    const requestData: PostWorkReportStatusRequest = {
+      status,
+      ...(status === 'REJECTED' && rejectReason ? { rejectReason } : {}),
+    };
+
+    // 3. API 함수에 전달
+    const response = await postWorkReportStatus(reportId, requestData);
 
     return {
       success: response.isSuccess,

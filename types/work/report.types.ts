@@ -1,9 +1,6 @@
 export interface PostWorkReportStatusRequest {
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   rejectReason?: string;
-  pending?: boolean;
-  rejected?: boolean;
-  approved?: boolean;
 }
 
 export interface PostWorkReportRequest {
@@ -38,7 +35,7 @@ export interface GetWorkReportDetailResponse {
   reportUserName: string;
   workSummary: string;
   workDate: string;
-  status: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   rejectReason: string | null;
   projectId: number;
   region: string;
