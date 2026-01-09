@@ -27,7 +27,6 @@ export default function WorkReportDetailContent({
 
   if (!report) return null;
 
-  console.log(user);
   const canReview = user?.role === 'STAFF' || user?.role === 'ADMIN';
   const isPending = report.status === 'PENDING';
 
