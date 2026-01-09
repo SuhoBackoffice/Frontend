@@ -31,7 +31,7 @@ export default async function ProjectDetail({ params }: { params: Params }) {
   const projectBranchDetailPromise = getProjectBranchDetail({ projectId: id });
 
   return (
-    <div className="container mx-auto space-y-6">
+    <div className="space-y-6">
       {/* 섹션 1: 기본 정보 */}
       <Suspense fallback={<ProjectInfoDetailLoading />}>
         <ProjectInfoDetail promiseData={projectDetailPromise} projectId={id} />
