@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -60,10 +60,12 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
 
     try {
       const result = await createWorkReportAction(projectId, payload);
+
       if (result.success) {
+        const reportId = result.data!.workReportId;
+        console.log(reportId);
         toast.success('업무 보고가 완료되었습니다.');
-        router.push(`/project/${projectId}/reports`);
-        router.refresh();
+        router.push(`/project/${projectId}/reports/${reportId}`);
       } else {
         toast.error(result.message || '입력값을 다시 확인해주세요.');
         if (result.errors) {
