@@ -3,34 +3,20 @@ import { ko } from 'date-fns/locale';
 import { User2, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GetWorkReportDetailResponse } from '@/types/work/report.types';
+import { STATUS_STYLE, StatusType } from '@/lib/constants/status-style';
 
 interface Props {
   report: GetWorkReportDetailResponse;
 }
 
 export const WorkReportInfoSection = ({ report }: Props) => {
-  const statusStyle = {
-    PENDING: {
-      container: 'bg-amber-500/10 border-amber-500/20',
-      text: 'text-amber-600 dark:text-amber-400',
-      badge: 'bg-amber-500',
-      label: '승인 대기',
-    },
-    APPROVED: {
-      container: 'bg-emerald-500/10 border-emerald-500/20',
-      text: 'text-emerald-600 dark:text-emerald-400',
-      badge: 'bg-emerald-600',
-      label: '승인 완료',
-    },
-    REJECTED: {
-      container: 'bg-rose-500/10 border-rose-500/20',
-      text: 'text-rose-600 dark:text-rose-400',
-      badge: 'bg-rose-600',
-      label: '반려',
-    },
+  const style = STATUS_STYLE[report.status as StatusType] || {
+    container: 'bg-slate-100 border-slate-200',
+    surface: 'bg-slate-50',
+    text: 'text-slate-500',
+    badge: 'bg-slate-500',
+    label: '알 수 없음',
   };
-
-  const style = statusStyle[report.status];
 
   return (
     <div
