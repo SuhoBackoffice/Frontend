@@ -29,7 +29,7 @@ export default function ProjectWorkReport({ promiseData, projectId }: ProjectWor
   }
 
   return (
-    <div className="bg-card overflow-hidden">
+    <div className="overflow-hidden">
       <div className="divide-border divide-y">
         {reports.map((report: any) => (
           <ReportListItem key={report.workReportId} report={report} projectId={projectId} />
