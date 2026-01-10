@@ -13,6 +13,7 @@ import { LoginDialog } from '../auth/LoginDialog';
 import { LogoutDialog } from '../auth/LogoutDialog';
 import { SignupButton } from '../auth/SingupButton';
 import { NotificationBell } from './NotificationBell';
+import { Skeleton } from '../ui/skeleton';
 
 const navItems = [
   { href: '/project', text: '프로젝트' },
@@ -22,6 +23,7 @@ const navItems = [
 
 export default function Header() {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
   return (
     <header className="bg-background/70 sticky top-0 z-40 border-b backdrop-blur-lg">
@@ -61,16 +63,24 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center justify-end gap-3">
-            {/* 로그인 상태에 따른 버튼 관리 */}
-            {isLoggedIn ? (
-              <>
-                <NotificationBell />
-                <LogoutDialog />
-              </>
+            {!_hasHydrated ? (
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-8 w-8 rounded-md" />
+                <Skeleton className="h-8 w-8 rounded-md" />
+              </div>
             ) : (
               <>
-                <SignupButton />
-                <LoginDialog />
+                {isLoggedIn ? (
+                  <>
+                    <NotificationBell />
+                    <LogoutDialog />
+                  </>
+                ) : (
+                  <>
+                    <SignupButton />
+                    <LoginDialog />
+                  </>
+                )}
               </>
             )}
             <ThemeToggle />

@@ -50,11 +50,9 @@ export function useNotification() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      console.log('로그인 되어있지 않음.');
       setNotifications([]);
       return;
     }
-    console.log('로그인 되어있음.');
 
     const eventSource = new EventSource(
       `${process.env.NEXT_PUBLIC_API_SERVER_URL}/notification/subscribe`,

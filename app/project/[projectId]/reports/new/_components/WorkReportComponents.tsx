@@ -63,7 +63,6 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
 
       if (result.success) {
         const reportId = result.data!.workReportId;
-        console.log(reportId);
         toast.success('업무 보고가 완료되었습니다.');
         router.push(`/project/${projectId}/reports/${reportId}`);
       } else {
