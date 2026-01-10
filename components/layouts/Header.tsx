@@ -12,6 +12,7 @@ import { useAuthStore } from '@/lib/store/auth.store';
 import { LoginDialog } from '../auth/LoginDialog';
 import { LogoutDialog } from '../auth/LogoutDialog';
 import { SignupButton } from '../auth/SingupButton';
+import { NotificationBell } from './NotificationBell';
 
 const navItems = [
   { href: '/project', text: '프로젝트' },
@@ -62,7 +63,10 @@ export default function Header() {
           <div className="flex items-center justify-end gap-3">
             {/* 로그인 상태에 따른 버튼 관리 */}
             {isLoggedIn ? (
-              <LogoutDialog />
+              <>
+                <NotificationBell />
+                <LogoutDialog />
+              </>
             ) : (
               <>
                 <SignupButton />
