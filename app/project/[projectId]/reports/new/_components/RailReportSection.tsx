@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Package, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Package, CheckCircle2, Hash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import AddRailReportWizard from './AddRailReportWizard';
 
@@ -57,43 +57,57 @@ export default function RailReportSection({
               const railInfo = availableRails.find(
                 (r: any) => (r.projectStraightId || r.projectBranchId) === railId
               );
-              const serialCount =
-                type === 'straight'
-                  ? item.projectStraightSerialIdList.length
-                  : item.projectBranchSerialIdList.length;
 
               return (
                 <div
                   key={idx}
-                  className="group hover:bg-muted/30 flex items-center justify-between rounded-lg px-2 py-4 transition-colors"
+                  className="group hover:bg-muted/30 flex flex-col gap-3 rounded-xl px-2 py-5 transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="bg-muted text-muted-foreground rounded-md p-2">
-                      <Package className="h-5 w-5" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-muted text-muted-foreground rounded-md p-2">
+                        <Package className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-black tracking-tight">
+                          {railInfo?.straightSerial || railInfo?.branchSerial}
+                        </p>
+                        <p className="text-muted-foreground text-sm font-bold">
+                          보고 수량:{' '}
+                          <span className="text-foreground">{item.productionQuantity}개</span>
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-base font-semibold">
-                        {railInfo?.straightSerial || railInfo?.branchSerial}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        보고 수량:{' '}
-                        <span className="text-foreground font-medium">{serialCount}개</span>
-                      </p>
+
+                    <div className="flex items-center gap-3">
+                      <Badge
+                        variant="secondary"
+                        className="bg-primary/10 text-primary border-none font-bold"
+                      >
+                        선택 완료
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-destructive transition-all"
+                        onClick={() => removeRow(idx)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <Badge variant="secondary" className="bg-primary/10 text-primary border-none">
-                      선택 완료
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive opacity-0 transition-all group-hover:opacity-100"
-                      onClick={() => removeRow(idx)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  {/* 시리얼 번호 리스트 표시 영역 */}
+                  <div className="flex flex-wrap gap-1.5 pl-14">
+                    {item.serialLabels?.map((label: string, sIdx: number) => (
+                      <div
+                        key={sIdx}
+                        className="bg-secondary/50 text-muted-foreground flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
+                      >
+                        <Hash className="h-3 w-3 opacity-50" />
+                        {label}
+                      </div>
+                    ))}
                   </div>
                 </div>
               );

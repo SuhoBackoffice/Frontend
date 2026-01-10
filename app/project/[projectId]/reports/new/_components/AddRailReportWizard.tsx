@@ -89,17 +89,25 @@ export default function AddRailReportWizard({
   };
 
   const handleFinalAdd = () => {
+    const selectedSerialsData = serials.filter((s) =>
+      selectedSerialIds.includes(s.straightSerialId || s.branchSerialId)
+    );
+
+    const serialLabels = selectedSerialsData.map((s) => s.serial);
+
     const newItem =
       type === 'straight'
         ? {
             projectStraightId: selectedRail.projectStraightId,
             productionQuantity: selectedSerialIds.length,
             projectStraightSerialIdList: selectedSerialIds,
+            serialLabels: serialLabels,
           }
         : {
             projectBranchId: selectedRail.projectBranchId,
             productionQuantity: selectedSerialIds.length,
             projectBranchSerialIdList: selectedSerialIds,
+            serialLabels: serialLabels,
           };
     onAdd(newItem);
     onOpenChange(false);
@@ -119,7 +127,7 @@ export default function AddRailReportWizard({
             </div>
             <div>
               <DialogTitle className="text-2xl font-black tracking-tight">
-                {step === 1 ? '레일 선택' : '시리얼 지정'}
+                {step === 1 ? '품목 선택' : '시리얼 지정'}
               </DialogTitle>
               <p className="text-muted-foreground mt-0.5 text-sm font-bold">
                 {step === 1
