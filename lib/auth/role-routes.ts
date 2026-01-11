@@ -18,9 +18,9 @@ export const ROUTE_ROLE_MAP: Array<{
     minRole: 'STAFF',
   },
 
-  // USER 이상
+  // 작업자 이상
   {
     pattern: /^\/project(\/.*)?$/,
-    minRole: 'USER',
+    minRole: 'WORKER',
   },
 ];

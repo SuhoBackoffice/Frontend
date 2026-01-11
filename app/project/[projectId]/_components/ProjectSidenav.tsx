@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -16,26 +17,55 @@ import {
   ChartColumnBig,
   Factory,
   ClipboardList,
+  ChevronRight,
+  ChevronLeft,
+  FilePlus,
+  FileText,
+  FileStack,
+  Menu,
 } from 'lucide-react';
-
-type NavItem = {
-  label: string;
-  href?: string | null;
-  icon?: LucideIcon;
-  children?: NavItem[];
-  disabled?: boolean; // 비활성 상태를 위한 속성 추가
-};
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const normalize = (p?: string | null) =>
   !p ? '' : p !== '/' && p.endsWith('/') ? p.slice(0, -1) : p;
 
-export function ProjectSidenav({ projectId }: { projectId: number }) {
+interface NavChildItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  disabled?: boolean;
+}
+
+interface NavSection {
+  label: string;
+  href?: string;
+  icon?: LucideIcon;
+  children?: NavChildItem[];
+}
+
+function NavContent({
+  projectId,
+  isCollapsed = false,
+  onLinkClick,
+}: {
+  projectId: number;
+  isCollapsed?: boolean;
+  onLinkClick?: () => void;
+}) {
   const rawPath = usePathname();
   const pathname = normalize(rawPath);
   const base = `/project/${projectId}`;
 
-  const nav: NavItem[] = [
+  const nav: NavSection[] = [
     { label: '개요', href: `${base}`, icon: LayoutDashboard },
+    {
+      label: '업무 보고',
+      icon: FileStack,
+      children: [
+        { label: '새 보고서 작성', href: `${base}/reports/new`, icon: FilePlus },
+        { label: '보고 목록 조회', href: `${base}/reports`, icon: FileText },
+      ],
+    },
     {
       label: '프로젝트 관리',
       icon: Settings2,
@@ -49,7 +79,6 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
       icon: Factory,
       children: [
         { label: '분기 레일', href: `${base}/branch/capacity`, icon: ClipboardList },
-        // '직선 레일' 항목을 비활성화 처리
         {
           label: '직선 레일',
           href: `${base}/straight/capacity`,
@@ -70,116 +99,144 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
   ];
 
   const isActiveExact = (href?: string | null) => !!href && pathname === normalize(href);
-
   const isActiveDeep = (href?: string | null) => {
     const h = normalize(href);
     return !!h && (pathname === h || pathname.startsWith(h + '/'));
   };
 
-  const isSectionActive = (section: NavItem) => {
-    if (section.href === base) {
-      return isActiveExact(section.href);
-    }
-    if (section.href && section.children && section.children.length > 0) {
-      return isActiveExact(section.href);
-    }
-    if (!section.href && section.children) {
-      return section.children.some((c) => isActiveDeep(c.href));
-    }
-    if (section.href) {
-      return isActiveDeep(section.href);
-    }
+  const isContentActive = (section: any) => {
+    if (section.href === base) return isActiveExact(section.href);
+    if (section.href && isActiveDeep(section.href)) return true;
+    if (section.children) return section.children.some((child: any) => isActiveDeep(child.href));
     return false;
   };
 
   return (
-    <nav className="bg-card rounded-xl border p-3">
-      <ul className="flex flex-col gap-3">
-        {nav.map((section) => {
-          const sectionActive = isSectionActive(section);
+    <ul className="flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto">
+      {nav.map((section) => {
+        const isExact = isActiveExact(section.href);
+        const isHighlight = isContentActive(section);
 
-          return (
-            <li key={section.label}>
-              {/* # 섹션 */}
-              {section.href ? (
-                <Button
-                  asChild
-                  variant={sectionActive ? 'default' : 'ghost'}
-                  className={cn(
-                    'w-full justify-start rounded-lg px-3 py-2 text-left text-lg font-semibold',
-                    sectionActive && 'opacity-80'
+        return (
+          <li key={section.label} className="group">
+            {section.href ? (
+              <Button
+                asChild
+                variant={isExact ? 'default' : 'ghost'}
+                className={cn(
+                  'w-full justify-start rounded-lg px-3 py-2 text-left text-lg font-semibold transition-all',
+                  isCollapsed && 'justify-center px-0',
+                  !isExact && isHighlight && 'text-primary hover:text-primary hover:bg-accent'
+                )}
+                onClick={onLinkClick}
+              >
+                <Link href={section.href}>
+                  {section.icon && (
+                    <section.icon className={cn('h-5 w-5', !isCollapsed && 'mr-2')} />
                   )}
-                  aria-current={sectionActive ? 'page' : undefined}
-                >
-                  <Link href={section.href}>
-                    {section.icon && <section.icon className="mr-2 h-5 w-5" />}
-                    <span className="whitespace-nowrap">{section.label}</span>
-                  </Link>
-                </Button>
-              ) : (
-                <div
-                  className={cn(
-                    'flex items-center gap-2 px-2 py-1 text-lg font-semibold',
-                    sectionActive ? 'text-primary' : 'text-foreground'
+                  {!isCollapsed && (
+                    <span className="animate-in fade-in slide-in-from-left-2">{section.label}</span>
                   )}
-                >
-                  {section.icon && <section.icon className="h-5 w-5" />}
-                  <span className="whitespace-nowrap">{section.label}</span>
-                </div>
-              )}
+                </Link>
+              </Button>
+            ) : (
+              <div
+                className={cn(
+                  'flex items-center gap-2 px-2 py-1 text-lg font-semibold transition-colors',
+                  isHighlight ? 'text-primary' : 'text-foreground',
+                  isCollapsed && 'justify-center px-0'
+                )}
+              >
+                {section.icon && <section.icon className="h-5 w-5" />}
+                {!isCollapsed && (
+                  <span className="animate-in fade-in slide-in-from-left-2">{section.label}</span>
+                )}
+              </div>
+            )}
 
-              {/* ## 하위 항목 */}
-              {section.children && section.children.length > 0 && (
-                <ul className="mt-2 space-y-1 border-l pl-4">
-                  {section.children.map((child) => {
-                    const childActive = isActiveDeep(child.href);
-                    return (
-                      <li key={child.label}>
-                        {child.disabled ? (
-                          // 비활성화된 항목 렌더링
-                          <div
-                            className={cn(
-                              'text-muted-foreground flex w-full cursor-not-allowed items-center justify-between rounded-md px-2 py-1 text-sm opacity-70'
-                            )}
-                          >
-                            <div className="flex items-center">
-                              {child.icon && <child.icon className="mr-2 h-4 w-4" />}
-                              <span className="whitespace-nowrap">{child.label}</span>
-                            </div>
-                            <Badge variant="destructive">준비 중</Badge>
-                          </div>
-                        ) : child.href ? (
-                          // 활성화된 링크 렌더링
-                          <Button
-                            asChild
-                            variant={childActive ? 'default' : 'ghost'}
-                            className={cn(
-                              'w-full justify-start rounded-md px-2 py-1 text-sm',
-                              childActive && 'opacity-80'
-                            )}
-                            aria-current={childActive ? 'page' : undefined}
-                          >
-                            <Link href={child.href}>
-                              {child.icon && <child.icon className="mr-2 h-4 w-4" />}
-                              <span className="whitespace-nowrap">{child.label}</span>
-                            </Link>
-                          </Button>
-                        ) : (
-                          // 링크가 없는 텍스트 항목 렌더링
-                          <div className="text-muted-foreground flex items-center gap-2 rounded-md px-2 py-1 text-sm">
-                            {child.icon && <child.icon className="h-4 w-4" />}
+            {!isCollapsed && section.children && section.children.length > 0 && (
+              <ul className="animate-in fade-in zoom-in-95 mt-2 space-y-1 border-l pl-4">
+                {section.children.map((child) => {
+                  const childActive = isActiveExact(child.href);
+                  return (
+                    <li key={child.label}>
+                      {child.disabled ? (
+                        <div className="text-muted-foreground flex w-full cursor-not-allowed items-center justify-between rounded-md px-2 py-1 text-sm opacity-70">
+                          <div className="flex items-center">
+                            {child.icon && <child.icon className="mr-2 h-4 w-4" />}
                             <span className="whitespace-nowrap">{child.label}</span>
                           </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+                          <Badge variant="destructive" className="origin-right scale-75">
+                            준비 중
+                          </Badge>
+                        </div>
+                      ) : (
+                        <Button
+                          asChild
+                          variant={childActive ? 'default' : 'ghost'}
+                          className={cn(
+                            'w-full justify-start rounded-md px-2 py-1 text-sm transition-colors',
+                            childActive && 'opacity-90 shadow-sm'
+                          )}
+                          onClick={onLinkClick}
+                        >
+                          <Link href={child.href!}>
+                            {child.icon && <child.icon className="mr-2 h-4 w-4" />}
+                            <span className="whitespace-nowrap">{child.label}</span>
+                          </Link>
+                        </Button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export function ProjectSidenav({ projectId }: { projectId: number }) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  return (
+    <nav
+      className={cn(
+        'bg-card relative hidden h-full flex-col rounded-xl border p-3 shadow-sm transition-all duration-300 ease-in-out lg:flex',
+        isCollapsed ? 'w-[70px]' : 'w-[240px]'
+      )}
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="hover:bg-accent bg-background absolute top-6 -right-3 z-10 h-6 w-6 rounded-full border shadow-sm"
+      >
+        {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+      </Button>
+      <NavContent projectId={projectId} isCollapsed={isCollapsed} />
     </nav>
+  );
+}
+
+export function MobileProjectNav({ projectId }: { projectId: number }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="lg:hidden">
+          <Menu className="h-6 w-6" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[280px] p-4">
+        <SheetHeader className="mb-4 text-left">
+          <SheetTitle className="text-xl font-bold">SUHO PM</SheetTitle>
+        </SheetHeader>
+        <NavContent projectId={projectId} onLinkClick={() => setOpen(false)} />
+      </SheetContent>
+    </Sheet>
   );
 }

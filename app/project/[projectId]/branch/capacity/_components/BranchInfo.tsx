@@ -47,7 +47,13 @@ const BranchInfoComponent = ({ branch, idx }: BranchInfoProps) => {
                   ? 'border border-emerald-500/30 bg-emerald-500/20 text-emerald-400'
                   : 'border border-red-500/30 bg-red-500/20 text-red-400',
               ].join(' ')}
-              title={branch.capacity > 0 ? '생산 가능' : '생산 불가'}
+              title={
+                branch.totalQuantity <= branch.completedQuantity
+                  ? '생산 완료'
+                  : branch.capacity > 0
+                    ? '생산 가능'
+                    : '생산 불가'
+              }
             >
               {branch.capacity > 0 ? (
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
