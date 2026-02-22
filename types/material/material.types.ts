@@ -25,8 +25,7 @@ export interface PostMaterialInboundRequest {
 }
 
 export interface MaterialInboundItemRequest {
-  drawingNumber: string;
-  itemName: string;
+  projectMaterialStockId: number;
   quantity: number;
 }
 
@@ -57,4 +56,6 @@ export interface GetMaterialSearchResponse {
   id: number;
   drawingNumber: string;
   itemName: string;
+  /** 입고 필요 수량 (정보성, 강제 아님) */
+  needInboundQuantity: number;
 }
