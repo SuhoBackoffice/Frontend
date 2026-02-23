@@ -30,29 +30,28 @@ export default function BasicInfoSection({
   return (
     <Card
       className={cn(
-        'overflow-hidden border-none bg-transparent shadow-none',
-        errors?.workSummary ? 'border-destructive/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : ''
+        errors?.workSummary && 'border-destructive shadow-sm'
       )}
     >
-      <CardHeader className="px-0">
+      <CardHeader>
         <CardTitle className="flex items-center gap-3 text-xl font-bold tracking-tight">
-          <div className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-lg">
+          <div className="bg-primary/10 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
             <CheckCircle2 className="h-5 w-5" />
           </div>
           기본 정보
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="px-0 pt-0">
+      <CardContent className="pt-0">
         <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-12">
           <div className="space-y-2 md:col-span-3">
             <Label className="text-muted-foreground ml-1 text-base font-bold">보고 일자</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant={'outline'}
+                  variant="outline"
                   className={cn(
-                    'border-muted-foreground/20 bg-background hover:bg-background hover:border-primary/50 h-11 w-full justify-between text-left font-normal shadow-sm transition-all',
+                    'h-11 w-full justify-between text-left font-normal',
                     !workDate && 'text-muted-foreground'
                   )}
                 >
@@ -61,10 +60,10 @@ export default function BasicInfoSection({
                   ) : (
                     <span>날짜 선택</span>
                   )}
-                  <CalendarIcon className="text-primary h-4 w-4 opacity-80" />
+                  <CalendarIcon className="text-muted-foreground h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="z-50 w-auto border p-0 shadow-xl" align="start">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={workDate ? new Date(workDate) : undefined}
@@ -99,19 +98,18 @@ export default function BasicInfoSection({
               id="summary"
               placeholder={'특이 사항을 적어주세요.\n없다면 공백 ✔'}
               className={cn(
-                'border-muted-foreground/20 min-h-[110px] resize-none p-3 text-base leading-relaxed transition-all',
-                'focus-visible:ring-primary/30 focus-visible:border-primary bg-background',
-                errors?.workSummary && 'border-destructive/60 bg-destructive/5'
+                'min-h-[110px] resize-none text-base leading-relaxed',
+                errors?.workSummary && 'border-destructive'
               )}
               value={workSummary}
               onChange={(e) => setWorkSummary(e.target.value)}
             />
 
-            {errors?.workSummary && (
-              <p className="text-destructive animate-in fade-in slide-in-from-top-1 px-1 text-xs font-semibold">
-                {errors.workSummary[0]}
-              </p>
-            )}
+              {errors?.workSummary && (
+                <p className="text-destructive px-1 text-xs font-semibold">
+                  {errors.workSummary[0]}
+                </p>
+              )}
           </div>
         </div>
       </CardContent>

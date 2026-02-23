@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 
 import {
   AlertDialog,
@@ -103,7 +102,7 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
   };
 
   return (
-    <div className="animate-in fade-in space-y- mx-auto pb-32 duration-500">
+    <div className="w-full space-y-6">
       <BasicInfoSection
         workDate={workDate}
         setWorkDate={setWorkDate}
@@ -132,7 +131,7 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
         errors={errors}
       />
 
-      <div className="sticky bottom-8 z-20 flex justify-end px-4 drop-shadow-lg">
+      <div className="sticky bottom-6 z-20 flex justify-end">
         <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
           <AlertDialogTrigger asChild>
             <Button
@@ -140,22 +139,20 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
               disabled={
                 isSubmitting || (straightReports.length === 0 && branchReports.length === 0)
               }
-              className={cn(
-                'shadow-primary/20 h-14 px-10 text-lg font-bold shadow-2xl transition-all hover:scale-105 active:scale-95'
-              )}
+              className="h-12 px-8 text-base font-semibold"
             >
               <CheckCircle2 className="mr-2 h-6 w-6" />
               보고서 제출하기
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="rounded-2xl">
+          <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-bold">
                 보고서를 제출하시겠습니까?
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="text-muted-foreground space-y-2 text-base">
-                  <div className="bg-muted/50 my-4 rounded-xl border border-dashed p-4">
+                  <div className="bg-muted/50 my-4 rounded-lg border border-dashed p-4">
                     <p className="text-foreground mb-2 text-sm font-bold">보고 항목 요약</p>
                     <ul className="list-inside list-disc space-y-1 text-sm">
                       {getReportSummary().map((line, i) => (
@@ -168,13 +165,12 @@ export default function WorkReportComponents({ projectId }: { projectId: number 
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="mt-4">
-              <AlertDialogCancel className="h-11 rounded-xl font-semibold">취소</AlertDialogCancel>
+              <AlertDialogCancel>취소</AlertDialogCancel>
               <AlertDialogAction
                 onClick={(e) => {
                   e.preventDefault();
                   handleSubmit();
                 }}
-                className="bg-primary hover:bg-primary/90 h-11 rounded-xl font-bold"
               >
                 확인 및 제출
               </AlertDialogAction>

@@ -17,7 +17,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { Check, ChevronRight, Package, ListChecks, Search } from 'lucide-react';
+import { Check, ChevronRight, Package, ListChecks, Search, ListOrdered } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   getReportableStraightSerialList,
@@ -40,6 +40,8 @@ export default function AddRailReportWizard({
   const [serials, setSerials] = useState<any[]>([]);
   const [loadingSerials, setLoadingSerials] = useState(false);
   const [serialSearch, setSerialSearch] = useState('');
+  const [rangeStart, setRangeStart] = useState<string>('');
+  const [rangeEnd, setRangeEnd] = useState<string>('');
 
   useEffect(() => {
     if (!open) {
@@ -47,6 +49,8 @@ export default function AddRailReportWizard({
       setSelectedRail(null);
       setSelectedSerialIds([]);
       setSerialSearch('');
+      setRangeStart('');
+      setRangeEnd('');
     }
   }, [open]);
 
@@ -72,6 +76,29 @@ export default function AddRailReportWizard({
     } else {
       setSelectedSerialIds((prev) => Array.from(new Set([...prev, ...currentPageIds])));
     }
+  };
+
+  /** 시리얼 문자열에서 끝 번호 추출 (예: "SR3600A-05" → 5, "SR3600A-66" → 66) */
+  const getSerialNumber = (serial: string): number | null => {
+    const match = serial.match(/-?(\d+)$/);
+    return match ? parseInt(match[1], 10) : null;
+  };
+
+  const applyRangeSelect = () => {
+    const start = rangeStart.trim() === '' ? null : parseInt(rangeStart, 10);
+    const end = rangeEnd.trim() === '' ? null : parseInt(rangeEnd, 10);
+    if (start == null || end == null || !Number.isInteger(start) || !Number.isInteger(end)) return;
+    const low = Math.min(start, end);
+    const high = Math.max(start, end);
+
+    const idsInRange = serials
+      .filter((s) => {
+        const num = getSerialNumber(s.serial);
+        return num != null && num >= low && num <= high;
+      })
+      .map((s) => s.straightSerialId || s.branchSerialId);
+
+    setSelectedSerialIds((prev) => Array.from(new Set([...prev, ...idsInRange])));
   };
 
   const handleSelectRail = (rail: any) => {
@@ -115,21 +142,17 @@ export default function AddRailReportWizard({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl overflow-hidden rounded-[28px] border-none p-0 shadow-2xl">
-        <DialogHeader className="px-8 pt-8 pb-4">
+      <DialogContent className="max-w-3xl overflow-hidden p-0">
+        <DialogHeader className="border-b px-6 py-5">
           <div className="flex items-center gap-4">
-            <div className="bg-primary/10 rounded-2xl p-3">
-              {step === 1 ? (
-                <Package className="text-primary h-6 w-6" />
-              ) : (
-                <ListChecks className="text-primary h-6 w-6" />
-              )}
+            <div className="bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+              {step === 1 ? <Package className="h-5 w-5" /> : <ListChecks className="h-5 w-5" />}
             </div>
-            <div>
-              <DialogTitle className="text-2xl font-black tracking-tight">
+            <div className="min-w-0">
+              <DialogTitle className="text-xl font-semibold tracking-tight">
                 {step === 1 ? '품목 선택' : '시리얼 지정'}
               </DialogTitle>
-              <p className="text-muted-foreground mt-0.5 text-sm font-bold">
+              <p className="text-muted-foreground mt-0.5 text-sm">
                 {step === 1
                   ? '생산 보고 품목을 선택하세요.'
                   : '생산 완료된 시리얼 번호를 선택하세요.'}
@@ -138,17 +161,12 @@ export default function AddRailReportWizard({
           </div>
         </DialogHeader>
 
-        <div className="px-4 pb-4">
+        <div className="px-6 pt-4 pb-6">
           {step === 1 ? (
-            <Command className="bg-transparent">
-              <div className="px-4 pb-2">
-                <CommandInput
-                  placeholder="품번 검색..."
-                  className="h-12 border-none text-base focus:ring-0"
-                />
-              </div>
-              <CommandList className="custom-scrollbar max-h-[380px] px-2">
-                <CommandEmpty className="text-muted-foreground/50 py-12 text-center font-bold">
+            <Command className="rounded-lg border">
+              <CommandInput placeholder="품번 검색..." className="h-10" />
+              <CommandList className="max-h-[400px]">
+                <CommandEmpty className="text-muted-foreground py-10 text-center text-sm">
                   결과가 없습니다.
                 </CommandEmpty>
                 <CommandGroup>
@@ -156,85 +174,122 @@ export default function AddRailReportWizard({
                     <CommandItem
                       key={rail.projectStraightId || rail.projectBranchId}
                       onSelect={() => handleSelectRail(rail)}
-                      className="border-border hover:bg-accent aria-selected:bg-accent mb-2 flex cursor-pointer items-center justify-between rounded-2xl border p-4 transition-all"
+                      className="aria-selected:bg-accent hover:bg-accent flex cursor-pointer items-center justify-between rounded-lg border border-transparent px-4 py-3"
                     >
-                      <div className="flex flex-col gap-1">
-                        <span className="text-lg font-black tracking-tight">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold">
                           {rail.straightSerial || rail.branchSerial}
                         </span>
-                        <span className="bg-secondary text-secondary-foreground w-fit rounded-full px-2 py-0.5 text-[11px] font-black uppercase">
+                        <span className="text-muted-foreground text-xs">
                           보고 가능 {rail.availableQuantity}개
                         </span>
                       </div>
-                      <ChevronRight className="text-muted-foreground/50 h-5 w-5" />
+                      <ChevronRight className="text-muted-foreground h-4 w-4" />
                     </CommandItem>
                   ))}
                 </CommandGroup>
               </CommandList>
             </Command>
           ) : (
-            <div className="animate-in fade-in slide-in-from-right-4 space-y-4 px-4 duration-300">
-              <div className="bg-secondary/50 flex items-center gap-3 rounded-2xl p-2">
-                <div className="relative flex-1">
-                  <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <div className="space-y-4">
+              <div className="bg-muted/20 flex flex-wrap items-center gap-2 rounded-lg border p-2">
+                <div className="bg-background flex items-center gap-2 rounded-md border px-3 py-1.5">
+                  <span className="text-muted-foreground text-sm">선택됨</span>
+                  <span className="text-foreground text-sm font-semibold">
+                    {selectedSerialIds.length}/{serials.length}개
+                  </span>
+                </div>
+                <div className="bg-background flex items-center gap-2 rounded-md border px-3 py-1.5">
+                  <ListOrdered className="text-muted-foreground h-4 w-4 shrink-0" />
+                  <span className="text-muted-foreground shrink-0 text-sm">범위</span>
                   <Input
-                    className="h-10 border-none bg-transparent pl-9 text-base font-bold focus-visible:ring-0"
-                    value={serialSearch}
-                    onChange={(e) => setSerialSearch(e.target.value)}
+                    type="number"
+                    min={1}
+                    placeholder="1"
+                    className="h-7 w-14 text-center text-sm"
+                    value={rangeStart}
+                    onChange={(e) => setRangeStart(e.target.value)}
                   />
+                  <span className="text-muted-foreground text-xs">~</span>
+                  <Input
+                    type="number"
+                    min={1}
+                    placeholder="90"
+                    className="h-7 w-14 text-center text-sm"
+                    value={rangeEnd}
+                    onChange={(e) => setRangeEnd(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="h-7 shrink-0 px-2 text-xs"
+                    onClick={applyRangeSelect}
+                  >
+                    적용
+                  </Button>
                 </div>
                 <Button
-                  variant="ghost"
-                  onClick={toggleAllSerials}
+                  variant="outline"
+                  size="sm"
                   className={cn(
-                    'h-10 rounded-xl px-4 font-black transition-all',
-                    isAllSelected
-                      ? 'text-primary hover:text-primary hover:bg-primary/5'
-                      : 'text-muted-foreground'
+                    'bg-background h-7 shrink-0 rounded-md border px-3 text-sm',
+                    isAllSelected && 'border-primary bg-primary/10 text-primary'
                   )}
+                  onClick={toggleAllSerials}
                 >
-                  {isAllSelected ? '전체 해제' : '전체 선택'}
+                  {isAllSelected ? '전체 해제' : `전체 선택 (${filteredSerials.length}개)`}
                 </Button>
               </div>
 
-              <div className="custom-scrollbar grid max-h-[320px] grid-cols-2 gap-3 overflow-y-auto pr-1 pb-2">
+              <div className="relative">
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                <Input
+                  placeholder="시리얼 번호 검색..."
+                  className="h-9 pl-9"
+                  value={serialSearch}
+                  onChange={(e) => setSerialSearch(e.target.value)}
+                />
+              </div>
+
+              <div className="custom-scrollbar grid max-h-[380px] grid-cols-2 gap-2 overflow-y-auto rounded-lg border p-2">
                 {filteredSerials.map((s: any) => {
                   const id = s.straightSerialId || s.branchSerialId;
                   const isSelected = selectedSerialIds.includes(id);
                   return (
-                    <div
+                    <button
                       key={id}
+                      type="button"
                       onClick={() =>
                         isSelected
                           ? setSelectedSerialIds(selectedSerialIds.filter((v) => v !== id))
                           : setSelectedSerialIds([...selectedSerialIds, id])
                       }
                       className={cn(
-                        'flex cursor-pointer items-center gap-3 rounded-[20px] border-2 p-4 transition-all duration-200',
-                        isSelected
-                          ? 'border-primary bg-primary/[0.03]'
-                          : 'border-border bg-card hover:border-muted-foreground/30'
+                        'hover:bg-muted/50 flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors',
+                        isSelected ? 'border-primary bg-primary/5' : 'border-border bg-background'
                       )}
                     >
-                      <div
+                      <span
                         className={cn(
-                          'flex h-6 w-6 items-center justify-center rounded-lg border-2 transition-all',
-                          isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'
+                          'flex h-5 w-5 shrink-0 items-center justify-center rounded border',
+                          isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/50'
                         )}
                       >
                         {isSelected && (
-                          <Check className="text-primary-foreground h-4 w-4 stroke-[3px]" />
+                          <Check className="text-primary-foreground h-3 w-3 stroke-[2.5px]" />
                         )}
-                      </div>
+                      </span>
                       <span
                         className={cn(
-                          'text-base font-black tracking-tight',
+                          'min-w-0 truncate text-sm font-medium',
                           isSelected ? 'text-primary' : 'text-foreground'
                         )}
+                        title={s.serial}
                       >
                         {s.serial}
                       </span>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -242,36 +297,34 @@ export default function AddRailReportWizard({
           )}
         </div>
 
-        <DialogFooter className="border-border flex items-center justify-between border-t px-8 py-5">
-          <div className="flex-1">
-            {step === 2 && (
+        <DialogFooter className="border-t px-6 py-4">
+          <div className="flex w-full items-center justify-between gap-4">
+            {step === 2 ? (
               <Button
                 variant="ghost"
+                size="sm"
                 onClick={() => setStep(1)}
-                className="text-muted-foreground hover:text-foreground h-11 px-0 font-black hover:bg-transparent"
+                className="text-muted-foreground -ml-2"
               >
                 ← 레일 다시 선택
               </Button>
+            ) : (
+              <div />
             )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-              className="text-muted-foreground h-11 rounded-xl px-6 font-black"
-            >
-              취소
-            </Button>
-            {step === 2 && (
-              <Button
-                disabled={selectedSerialIds.length === 0}
-                onClick={handleFinalAdd}
-                className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary/90 h-11 rounded-xl px-8 font-black shadow-lg transition-all disabled:opacity-30"
-              >
-                {selectedSerialIds.length}개 추가 완료
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+                취소
               </Button>
-            )}
+              {step === 2 && (
+                <Button
+                  size="sm"
+                  disabled={selectedSerialIds.length === 0}
+                  onClick={handleFinalAdd}
+                >
+                  {selectedSerialIds.length}개 추가 완료
+                </Button>
+              )}
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>
