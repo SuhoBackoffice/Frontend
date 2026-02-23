@@ -1,16 +1,19 @@
 import {
   GetMaterialInboundDetailHistoryResponse,
   GetMaterialInboundDetailHistroyRequest,
+  GetMaterialHistoryPagedRequest,
   GetMaterialInboundHistoryResponse,
   GetMaterialInboundHistroyRequest,
   GetMaterialSearchRequest,
   GetMaterialSearchResponse,
   GetMaterialSummaryRequest,
   GetMaterialSummaryResponse,
+  MaterialHistoryItemResponse,
   PostMaterialInboundRequest,
 } from '@/types/material/material.types';
 import { fetchApi } from '../api-client';
 import { ApiResponse } from '@/types/api.types';
+import type { PagingResponse } from '@/types/api.types';
 
 export async function getMaterialSummary(
   data: GetMaterialSummaryRequest
@@ -39,6 +42,34 @@ export async function getMaterialHistory(
   const url = `/material/history/${projectId}${queryString ? `?${queryString}` : ''}`;
 
   return fetchApi<GetMaterialInboundHistoryResponse[]>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function getMaterialHistoryPaged(
+  data: GetMaterialHistoryPagedRequest
+): Promise<ApiResponse<PagingResponse<MaterialHistoryItemResponse>>> {
+  const { projectId, keyword, sort = 'LATEST', type, page, size } = data;
+
+  const queryParams = new URLSearchParams();
+  queryParams.set('sort', sort);
+  queryParams.set('page', String(page));
+  queryParams.set('size', String(size));
+  if (keyword !== undefined && keyword !== null && keyword !== '') {
+    queryParams.set('keyword', keyword);
+  }
+  if (type !== undefined && type !== null && type !== 'ALL') {
+    queryParams.set('type', type);
+  }
+
+  const queryString = queryParams.toString();
+  const url = `/material/history/${projectId}?${queryString}`;
+
+  return fetchApi<PagingResponse<MaterialHistoryItemResponse>>(url, {
     method: 'GET',
     credentials: 'include',
     headers: {

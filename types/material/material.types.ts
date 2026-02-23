@@ -8,6 +8,16 @@ export interface GetMaterialInboundHistroyRequest {
   keyword?: string;
 }
 
+/** 페이징 조회 요청 (sort 기본 LATEST, type 없으면 ALL) */
+export interface GetMaterialHistoryPagedRequest {
+  projectId: number;
+  keyword?: string;
+  sort?: 'LATEST' | 'OLDEST';
+  type?: string;
+  page: number;
+  size: number;
+}
+
 export interface GetMaterialInboundDetailHistroyRequest {
   projectId: number;
   keyword?: string;
@@ -42,6 +52,17 @@ export interface GetMaterialInboundHistoryResponse {
   date: string;
   kindCount: number;
   totalCount: number;
+}
+
+/** 페이징 이력 한 건 */
+export interface MaterialHistoryItemResponse {
+  id: number;
+  materialCode: string;
+  itemName: string;
+  quantity: number;
+  description: string;
+  type: string;
+  createdAt: string;
 }
 
 export interface GetMaterialInboundDetailHistoryResponse {
