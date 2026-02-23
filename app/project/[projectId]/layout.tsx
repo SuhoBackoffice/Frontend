@@ -25,7 +25,7 @@ export default async function ProjectLayout({
         </div>
       </header>
 
-      <div className="container mx-auto flex flex-1 flex-col p-4 md:p-8 lg:grid lg:grid-cols-[auto_1fr] lg:items-stretch lg:gap-8">
+      <div className="container mx-auto flex flex-1 flex-col p-4 md:p-8 lg:grid lg:grid-cols-[auto_1fr] lg:items-stretch lg:gap-4">
         <aside className="hidden lg:block">
           <div className="lg:sticky lg:top-8 lg:h-[calc(100dvh-6rem)]">
             <ProjectSidenav projectId={id} />
