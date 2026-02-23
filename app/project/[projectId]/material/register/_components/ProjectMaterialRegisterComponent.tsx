@@ -145,8 +145,8 @@ export default function ProjectMaterialRegisterComponent({
     <form action={formAction}>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold tracking-tight">자재 입고 등록</CardTitle>
-          <CardDescription className="pt-1 text-base">
+          <CardTitle className="text-2xl font-bold tracking-tight">자재 입고 등록</CardTitle>
+          <CardDescription className="pt-1">
             아래 검색창을 통해 자재를 검색하고 목록에 추가한 뒤 수량을 입력해 등록할 수 있습니다.
           </CardDescription>
         </CardHeader>
@@ -292,7 +292,7 @@ export default function ProjectMaterialRegisterComponent({
           />
         </CardContent>
 
-        <CardFooter className="flex justify-end border-t pt-6">
+        <CardFooter className="flex justify-end !border-t-0">
           {state.message && !state.success && (
             <p className="text-destructive mr-4 text-sm">{state.message}</p>
           )}

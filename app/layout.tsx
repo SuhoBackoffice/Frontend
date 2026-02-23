@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <TooltipProvider delayDuration={150}>
             <div className="flex min-h-screen flex-col">
               <Header />
-              <Toaster position="top-center" expand={false} richColors />
+              <Toaster position="bottom-center" expand={false} richColors />
               <main className="container flex-1">{children}</main>
               <Footer />
             </div>
