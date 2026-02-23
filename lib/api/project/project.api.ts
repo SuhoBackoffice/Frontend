@@ -79,10 +79,13 @@ export async function getProjectDetail(
 }
 
 export async function getProjectStraightDetail(
-  params: GetProjectDetailRequest
-): Promise<ApiResponse<ProjectInfoStraightResponse[]>> {
-  const { projectId } = params;
-  return fetchApi<ProjectInfoStraightResponse[]>(`/project/${projectId}/straight`, {
+  projectId: number,
+  length?: string
+): Promise<ApiResponse<ProjectInfoStraightResponse>> {
+  const url = length
+    ? `/project/${projectId}/straight?length=${length}`
+    : `/project/${projectId}/straight`;
+  return fetchApi<ProjectInfoStraightResponse>(url, {
     method: 'GET',
     credentials: 'include',
     headers: {

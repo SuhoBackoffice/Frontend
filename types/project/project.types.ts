@@ -80,23 +80,17 @@ export interface ProjectInfoBranchResponse {
   imageUrl: string;
 }
 
-export interface ProjectInfoStraightResponse {
+export interface StraightListItem {
   straightRailId: number;
-  length: number;
-  isLoopRail: boolean;
-  straightType: string;
+  serial: string;
   totalQuantity: number;
-  litzInfo: LitzWireSupportInfo;
-  holePosition: number;
+  completedQuantity: number;
+  holePosition?: number;
 }
 
-export interface LitzWireSupportInfo {
-  litz1: number;
-  litz2: number;
-  litz3: number;
-  litz4: number;
-  litz5: number;
-  litz6: number;
+export interface ProjectInfoStraightResponse {
+  normalStraightList: StraightListItem[];
+  loopStraightList: StraightListItem[];
 }
 
 export interface PostProjectBranchRegisterResponse {
