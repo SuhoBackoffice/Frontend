@@ -71,13 +71,10 @@ export interface ProjecInfoDetailResponse {
 
 export interface ProjectInfoBranchResponse {
   projectBranchId: number;
-  branchCode: string;
-  branchVersion: string;
+  branchName: string;
+  branchSerial: string;
   totalQuantity: number;
   completedQuantity: number;
-  branchTypeId: number;
-  branchName: string;
-  imageUrl: string;
 }
 
 export interface StraightListItem {

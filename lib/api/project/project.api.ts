@@ -20,6 +20,7 @@ import {
   GetProjectBranchCapacityResponse,
   GetProjectOnGoingList,
 } from '@/types/project/project.types';
+import { BranchDetailResponse } from '@/types/branch/branch.types';
 
 export async function postNewProject(data: NewProjectRequest): Promise<ApiResponse<null>> {
   return fetchApi<null>('/project/new', {
@@ -95,10 +96,26 @@ export async function getProjectStraightDetail(
 }
 
 export async function getProjectBranchDetail(
-  params: GetProjectDetailRequest
+  projectId: number,
+  keyword?: string
 ): Promise<ApiResponse<ProjectInfoBranchResponse[]>> {
-  const { projectId } = params;
-  return fetchApi<ProjectInfoBranchResponse[]>(`/project/${projectId}/branch`, {
+  const url = keyword
+    ? `/project/${projectId}/branch?keyword=${keyword}`
+    : `/project/${projectId}/branch`;
+  return fetchApi<ProjectInfoBranchResponse[]>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function getProjectBranchDetailById(
+  projectId: number,
+  projectBranchId: number
+): Promise<ApiResponse<BranchDetailResponse>> {
+  return fetchApi<BranchDetailResponse>(`/project/${projectId}/branch/${projectBranchId}`, {
     method: 'GET',
     credentials: 'include',
     headers: {

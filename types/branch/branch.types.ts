@@ -1,3 +1,23 @@
+// 공통
+export interface BranchSerialInfo {
+  serial: string;
+  serialState: string;
+  productionState: string;
+  producedAt: string | null;
+  inactiveReason: string | null;
+}
+
+export interface BranchDetailResponse {
+  serial: string;
+  totalQuantity: number;
+  completedQuantity: number;
+  code: string;
+  name: string;
+  branchVersion: string;
+  imageUrl: string | null;
+  serialInfoList: BranchSerialInfo[];
+}
+
 // 요청
 export interface GetBranchLatestBomRequest {
   branchCode: string;

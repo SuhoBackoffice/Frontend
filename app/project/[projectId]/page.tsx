@@ -28,7 +28,7 @@ export default async function ProjectDetail({ params }: { params: Params }) {
 
   const projectDetailPromise = getProjectDetail({ projectId: id });
   const projectStraightDetailPromise = getProjectStraightDetail(id);
-  const projectBranchDetailPromise = getProjectBranchDetail({ projectId: id });
+  const projectBranchDetailPromise = getProjectBranchDetail(id);
 
   return (
     <div className="space-y-4">
