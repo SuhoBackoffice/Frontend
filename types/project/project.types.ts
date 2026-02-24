@@ -43,6 +43,8 @@ export interface PatchProjectBranchRequest {
 
 export interface GetProjectBranchCapacityRequest {
   projectId: number;
+  sort?: string;
+  dir?: 'ASC' | 'DESC';
 }
 
 // 응답
@@ -95,20 +97,55 @@ export interface PostProjectBranchRegisterResponse {
 }
 
 export interface GetProjectBranchCapacityResponse {
-  imageUrl: string;
-  branchTypeId: number;
-  code: string;
+  imageUrl: string | null;
+  projectBranchId: number;
+  serial: string;
   name: string;
   totalQuantity: number;
   completedQuantity: number;
   capacity: number;
-  branchBomShortageList: GetBranchBomShortageList[];
+  remainingQuantity: number;
+  effectiveCapacity: number;
 }
 
-export interface GetBranchBomShortageList {
+export interface BranchCapacitySortType {
+  sort: string;
+  description: string;
+}
+
+export interface GetBranchCapacityDetailRequest {
+  projectId: number;
+  projectBranchId: number;
+  sort?: string;
+  dir?: 'ASC' | 'DESC';
+  onlyShortage?: boolean;
+}
+
+export interface BranchBomShortageItem {
   drawingNumber: string;
   itemName: string;
-  shortage: number;
+  itemType: string;
+  specification: string;
+  unitQuantity: number;
+  unit: string;
+  suppliedMaterial: boolean;
+  stockQuantity: number;
+  requiredQuantity: number;
+  shortageQuantity: number;
+  isShortage: boolean;
+  availableCapacity: number;
+}
+
+export interface GetBranchCapacityDetailResponse {
+  serial: string;
+  code: string;
+  name: string;
+  totalQuantity: number;
+  completedQuantity: number;
+  remainingQuantity: number;
+  capacity: number;
+  effectiveCapacity: number;
+  bomShortageList: BranchBomShortageItem[];
 }
 
 export interface GetProjectOnGoingList {
