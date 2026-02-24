@@ -26,8 +26,8 @@ export default function Header() {
   const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
   return (
-    <header className="bg-background/70 sticky top-0 z-40 border-b backdrop-blur-lg">
-      <div className="container flex h-[var(--header-height)] items-center px-4">
+    <header className="bg-background/80 sticky top-0 z-40 border-b shadow-sm backdrop-blur-lg">
+      <div className="container flex h-[var(--header-height)] items-center">
         <div className="grid w-full grid-cols-[200px_1fr_200px] items-center">
           {/* 홈 페이지 */}
           <div className="flex items-center justify-start">
