@@ -1,15 +1,8 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(head:*)",
-      "Bash(cd \"C:/Users/ksu98/Desktop/suho-tech/suho-application\" && npx tsc --noEmit 2>&1)",
-      "Bash(tail:*)",
-      "FileRead(*)",
-      "FileWrite(*)",
-      "FileEdit(*)",
-      "FileDelete(*)",
-      "FileCreate(*)",
-      "mcp__ide__getDiagnostics"
-    ]
+    "allow": ["Bash(*)", "File(*)", "EditFile(*)", "mcp__ide__getDiagnostics"]
+  },
+  "context": {
+    "maxFiles": 30
   }
 }

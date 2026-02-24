@@ -77,6 +77,20 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
+  /* Material page KPI accent colors */
+  --mat-kpi-1: oklch(0.537 0.245 263.83);
+  --mat-kpi-1-bg: oklch(0.94 0.04 263.83);
+  --mat-kpi-2: oklch(0.58 0.22 295);
+  --mat-kpi-2-bg: oklch(0.94 0.04 295);
+  --mat-kpi-3: oklch(0.53 0.17 152);
+  --mat-kpi-3-bg: oklch(0.93 0.05 152);
+  --mat-kpi-4: oklch(0.68 0.19 55);
+  --mat-kpi-4-bg: oklch(0.95 0.05 55);
+  --mat-chart-1: oklch(0.537 0.245 263.83);
+  --mat-chart-2: oklch(0.53 0.17 152);
+  --mat-chart-3: oklch(0.68 0.19 55);
+  --mat-pie-empty: oklch(0.9 0 0);
+
   --header-height: 6rem;
   --sticky-offset: 1.5rem;
   --sticky-top: calc(var(--header-height) + var(--sticky-offset));
@@ -114,6 +128,13 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Material page KPI accent backgrounds (dark mode overrides) */
+  --mat-kpi-1-bg: oklch(0.27 0.05 263.83);
+  --mat-kpi-2-bg: oklch(0.27 0.05 295);
+  --mat-kpi-3-bg: oklch(0.27 0.05 152);
+  --mat-kpi-4-bg: oklch(0.28 0.05 55);
+  --mat-pie-empty: oklch(0.3 0 0);
 }
 
 @layer base {
