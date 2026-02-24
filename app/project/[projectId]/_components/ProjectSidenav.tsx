@@ -101,9 +101,7 @@ function NavContent({
       label: '개요',
       href: `${base}`,
       icon: LayoutDashboard,
-      children: [
-        { label: '물량 리스트', icon: FileSpreadsheet, action: 'download-quantity' },
-      ],
+      children: [{ label: '물량 리스트', icon: FileSpreadsheet, action: 'download-quantity' }],
     },
     {
       label: '업무 보고',
@@ -271,7 +269,7 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
   return (
     <nav
       className={cn(
-        'bg-card relative hidden h-full flex-col rounded-xl border p-3 shadow-sm transition-all duration-300 ease-in-out lg:flex',
+        'bg-card relative hidden flex-col rounded-xl border p-5 pb-10 shadow-sm transition-all duration-300 ease-in-out lg:flex',
         isCollapsed ? 'w-[70px]' : 'w-[240px]'
       )}
     >
