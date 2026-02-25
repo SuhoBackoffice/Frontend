@@ -184,7 +184,7 @@ export default function ProjectMaterialHistoryMain({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">자재 이력</CardTitle>
+        <CardTitle className="text-2xl">자재 입·출고 이력</CardTitle>
         <CardDescription>입·출고 이력을 검색·필터하여 확인할 수 있습니다.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
