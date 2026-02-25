@@ -22,15 +22,15 @@ export default function ProjectWorkReport({ promiseData, projectId }: ProjectWor
 
   if (reports.length === 0) {
     return (
-      <div className="bg-muted/20 flex flex-col items-center justify-center rounded-3xl border border-dashed py-20 text-center">
+      <div className="bg-card flex flex-col items-center justify-center rounded-2xl border border-dashed py-20 text-center shadow-sm">
         <p className="text-muted-foreground font-medium">해당 조건에 맞는 보고서가 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden">
-      <div className="divide-border divide-y">
+    <div className="bg-card overflow-hidden rounded-2xl border shadow-sm">
+      <div className="divide-border divide-y px-6">
         {reports.map((report: any) => (
           <ReportListItem key={report.workReportId} report={report} projectId={projectId} />
         ))}
