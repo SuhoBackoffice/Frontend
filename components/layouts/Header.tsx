@@ -63,7 +63,7 @@ export default function Header() {
         <div className="bg-background/60 fixed inset-0 top-[var(--header-height)] z-30 backdrop-blur-xs" />
       )}
 
-      <header className="bg-primary/10 sticky top-0 z-40 border-b shadow-sm backdrop-blur-lg">
+      <header className="bg-primary/5 sticky top-0 z-40 border-b shadow-sm backdrop-blur-lg">
         <div className="container flex h-[var(--header-height)] items-center">
           <div className="grid w-full grid-cols-[auto_1fr_auto] items-center lg:grid-cols-[200px_1fr_200px]">
             {/* 로고 */}
