@@ -80,3 +80,35 @@ export interface GetMaterialSearchResponse {
   /** 입고 필요 수량 (정보성, 강제 아님) */
   needInboundQuantity: number;
 }
+
+// 자재 재고 현황
+export type MaterialStockSortType =
+  | 'MATERIAL_CODE'
+  | 'ITEM_NAME'
+  | 'PLAN_QUANTITY'
+  | 'INBOUND_QUANTITY'
+  | 'USED_QUANTITY';
+
+export type MaterialStockDirType = 'ASC' | 'DESC';
+
+export interface GetMaterialStockSortResponse {
+  sort: MaterialStockSortType;
+  description: string;
+}
+
+export interface GetMaterialStockListRequest {
+  projectId: number;
+  sort: MaterialStockSortType;
+  dir: MaterialStockDirType;
+  keyword?: string;
+}
+
+export interface GetMaterialStockItemResponse {
+  id: number;
+  materialCode: string;
+  itemName: string;
+  totalPlanQuantity: number;
+  totalInboundQuantity: number;
+  totalUsedQuantity: number;
+  remainingInbound: number;
+}

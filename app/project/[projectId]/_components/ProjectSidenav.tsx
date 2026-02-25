@@ -25,6 +25,7 @@ import {
   Menu,
   FileSpreadsheet,
   Loader2,
+  WarehouseIcon,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { getProjectQuantityList } from '@/lib/api/project/project.api';
@@ -138,6 +139,7 @@ function NavContent({
       children: [
         { label: '자재 입고 등록', href: `${base}/material/register`, icon: PackagePlus },
         { label: '자재 입고 이력', href: `${base}/material/history`, icon: ChartColumnBig },
+        { label: '자재 현황', href: `${base}/material/stock`, icon: WarehouseIcon },
       ],
     },
   ];

@@ -10,6 +10,9 @@ import {
   GetMaterialSummaryResponse,
   MaterialHistoryItemResponse,
   PostMaterialInboundRequest,
+  GetMaterialStockSortResponse,
+  GetMaterialStockListRequest,
+  GetMaterialStockItemResponse,
 } from '@/types/material/material.types';
 import { fetchApi } from '../api-client';
 import { ApiResponse } from '@/types/api.types';
@@ -120,6 +123,34 @@ export async function getMaterialSearch(
       'Content-Type': 'application/json',
     },
   });
+}
+
+export async function getMaterialStockSortTypes(): Promise<
+  ApiResponse<GetMaterialStockSortResponse[]>
+> {
+  return fetchApi<GetMaterialStockSortResponse[]>('/material/stock/types', {
+    method: 'GET',
+    credentials: 'include',
+  });
+}
+
+export async function getMaterialStockList(
+  data: GetMaterialStockListRequest
+): Promise<ApiResponse<GetMaterialStockItemResponse[]>> {
+  const { projectId, sort, dir, keyword } = data;
+
+  const queryParams = new URLSearchParams();
+  queryParams.set('sort', sort);
+  queryParams.set('dir', dir);
+  if (keyword) queryParams.set('keyword', keyword);
+
+  return fetchApi<GetMaterialStockItemResponse[]>(
+    `/material/stock/${projectId}?${queryParams.toString()}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    }
+  );
 }
 
 export async function postMaterialInbound(
