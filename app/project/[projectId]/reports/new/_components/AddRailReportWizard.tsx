@@ -142,7 +142,7 @@ export default function AddRailReportWizard({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl overflow-hidden p-0">
+      <DialogContent className="bg-card max-w-3xl overflow-hidden p-0">
         <DialogHeader className="border-b px-6 py-5">
           <div className="flex items-center gap-4">
             <div className="bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -192,14 +192,14 @@ export default function AddRailReportWizard({
             </Command>
           ) : (
             <div className="space-y-4">
-              <div className="bg-muted/20 flex flex-wrap items-center gap-2 rounded-lg border p-2">
-                <div className="bg-background flex items-center gap-2 rounded-md border px-3 py-1.5">
+              <div className="bg-muted/40 flex flex-wrap items-center gap-2 rounded-lg border p-2">
+                <div className="bg-card flex items-center gap-2 rounded-md border px-3 py-1.5">
                   <span className="text-muted-foreground text-sm">선택됨</span>
                   <span className="text-foreground text-sm font-semibold">
                     {selectedSerialIds.length}/{serials.length}개
                   </span>
                 </div>
-                <div className="bg-background flex items-center gap-2 rounded-md border px-3 py-1.5">
+                <div className="bg-card flex items-center gap-2 rounded-md border px-3 py-1.5">
                   <ListOrdered className="text-muted-foreground h-4 w-4 shrink-0" />
                   <span className="text-muted-foreground shrink-0 text-sm">범위</span>
                   <Input
@@ -233,7 +233,7 @@ export default function AddRailReportWizard({
                   variant="outline"
                   size="sm"
                   className={cn(
-                    'bg-background h-7 shrink-0 rounded-md border px-3 text-sm',
+                    'bg-card h-7 shrink-0 rounded-md border px-3 text-sm',
                     isAllSelected && 'border-primary bg-primary/10 text-primary'
                   )}
                   onClick={toggleAllSerials}
@@ -267,7 +267,7 @@ export default function AddRailReportWizard({
                       }
                       className={cn(
                         'hover:bg-muted/50 flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors',
-                        isSelected ? 'border-primary bg-primary/5' : 'border-border bg-background'
+                        isSelected ? 'border-primary bg-primary/5' : 'border-border bg-card'
                       )}
                     >
                       <span
