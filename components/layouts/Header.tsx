@@ -34,19 +34,19 @@ const navItems: NavItem[] = [
     text: '프로젝트',
     icon: FolderKanban,
     items: [
-      { href: '/project/register', text: '신규 프로젝트 생성' },
-      { href: '/project', text: '프로젝트 목록 조회' },
+      { href: '/project', text: '프로젝트 조회' },
+      { href: '/project/register', text: '신규 프로젝트' },
     ],
-  },
-  {
-    text: '소개',
-    icon: Info,
-    items: [{ href: '/about', text: '소개보기' }],
   },
   {
     text: '관리',
     icon: Settings,
     items: [{ href: '/admin/version', text: '버전관리' }],
+  },
+  {
+    text: '소개',
+    icon: Info,
+    items: [{ href: '/about', text: '소개보기' }],
   },
 ];
 
