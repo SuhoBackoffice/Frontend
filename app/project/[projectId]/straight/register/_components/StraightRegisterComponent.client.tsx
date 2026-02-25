@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -131,7 +131,9 @@ export default function StraightRegisterComponent({ projectId }: Props) {
               <Ruler className="text-primary h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold tracking-tight">직선 레일 일괄 등록</CardTitle>
+              <CardTitle className="text-2xl font-bold tracking-tight">
+                직선 레일 일괄 등록
+              </CardTitle>
               <CardDescription className="mt-0.5">
                 레일 항목을 추가하고 길이·타입·수량을 입력한 뒤 한 번에 등록하세요.
               </CardDescription>
@@ -162,7 +164,7 @@ export default function StraightRegisterComponent({ projectId }: Props) {
               수량
             </span>
             <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-              루프 레일
+              레일 타입
             </span>
             <div />
           </div>
@@ -226,7 +228,7 @@ export default function StraightRegisterComponent({ projectId }: Props) {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            'h-9 w-full justify-between bg-background font-normal',
+                            'bg-background h-9 w-full justify-between font-normal',
                             rowErrors?.straightTypeId && 'border-destructive'
                           )}
                         >
@@ -291,8 +293,8 @@ export default function StraightRegisterComponent({ projectId }: Props) {
                   </div>
 
                   {/* 루프 레일 */}
-                  <div className="flex h-9 items-center justify-center gap-2">
-                    <Checkbox
+                  <div className="flex h-9 flex-col items-center justify-center gap-1">
+                    <Switch
                       id={`loop-${row.id}`}
                       checked={row.isLoopRail}
                       onCheckedChange={(checked) =>
@@ -301,7 +303,7 @@ export default function StraightRegisterComponent({ projectId }: Props) {
                     />
                     <Label
                       htmlFor={`loop-${row.id}`}
-                      className="cursor-pointer select-none text-sm font-normal"
+                      className="text-muted-foreground cursor-pointer text-xs font-normal select-none"
                     >
                       {row.isLoopRail ? '루프' : '일반'}
                     </Label>
