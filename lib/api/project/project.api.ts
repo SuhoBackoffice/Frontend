@@ -8,6 +8,8 @@ import {
   PostProjectStraightRequest,
   GetProjectBranchCapacityRequest,
   GetBranchCapacityDetailRequest,
+  GetProjectStraightCapacityRequest,
+  GetStraightCapacityDetailRequest,
   //응답
   ProjectSearchSortResponse,
   ProjectInfoResponse,
@@ -22,6 +24,9 @@ import {
   BranchCapacitySortType,
   GetBranchCapacityDetailResponse,
   GetProjectOnGoingList,
+  GetProjectStraightCapacityResponse,
+  StraightCapacitySortType,
+  GetStraightCapacityDetailResponse,
 } from '@/types/project/project.types';
 import { BranchDetailResponse } from '@/types/branch/branch.types';
 
@@ -261,6 +266,65 @@ export function getProjectBranchCapacityDetail(
 
 export function getProjectBranchCapacityAnalyzeSortTypes(): Promise<ApiResponse<BranchCapacitySortType[]>> {
   return fetchApi<BranchCapacitySortType[]>('/project/branch/capacity/analyze/types', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectStraightCapacity(
+  data: GetProjectStraightCapacityRequest
+): Promise<ApiResponse<GetProjectStraightCapacityResponse[]>> {
+  const { projectId, sort, dir } = data;
+  const queryParams = new URLSearchParams();
+  if (sort) queryParams.append('sort', sort);
+  if (dir) queryParams.append('dir', dir);
+  const queryString = queryParams.toString();
+  const url = `/project/${projectId}/straight/capacity${queryString ? `?${queryString}` : ''}`;
+
+  return fetchApi<GetProjectStraightCapacityResponse[]>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectStraightCapacitySortTypes(): Promise<ApiResponse<StraightCapacitySortType[]>> {
+  return fetchApi<StraightCapacitySortType[]>('/project/straight/capacity/types', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectStraightCapacityDetail(
+  data: GetStraightCapacityDetailRequest
+): Promise<ApiResponse<GetStraightCapacityDetailResponse>> {
+  const { projectId, projectStraightId, sort, dir, onlyShortage } = data;
+  const queryParams = new URLSearchParams();
+  if (sort) queryParams.append('sort', sort);
+  if (dir) queryParams.append('dir', dir);
+  if (onlyShortage !== undefined) queryParams.append('onlyShortage', String(onlyShortage));
+  const queryString = queryParams.toString();
+  const url = `/project/${projectId}/straight/${projectStraightId}/capacity${queryString ? `?${queryString}` : ''}`;
+
+  return fetchApi<GetStraightCapacityDetailResponse>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectStraightCapacityAnalyzeSortTypes(): Promise<ApiResponse<StraightCapacitySortType[]>> {
+  return fetchApi<StraightCapacitySortType[]>('/project/straight/capacity/analyze/types', {
     method: 'GET',
     credentials: 'include',
     headers: {

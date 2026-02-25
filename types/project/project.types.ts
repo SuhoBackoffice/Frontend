@@ -156,3 +156,59 @@ export interface GetProjectOnGoingList {
   startDate: string;
   endDate: string;
 }
+
+// ── 직선레일 Capacity ──────────────────────────────────────────────────────────
+
+export interface GetProjectStraightCapacityRequest {
+  projectId: number;
+  sort?: string;
+  dir?: 'ASC' | 'DESC';
+}
+
+export interface GetStraightCapacityDetailRequest {
+  projectId: number;
+  projectStraightId: number;
+  sort?: string;
+  dir?: 'ASC' | 'DESC';
+  onlyShortage?: boolean;
+}
+
+export interface GetProjectStraightCapacityResponse {
+  projectStraightId: number;
+  serial: string;
+  length: number;
+  isLoopRail: boolean;
+  totalQuantity: number;
+  completedQuantity: number;
+  capacity: number;
+  remainingQuantity: number;
+  effectiveCapacity: number;
+}
+
+export interface StraightCapacitySortType {
+  sort: string;
+  description: string;
+}
+
+export interface StraightBomShortageItem {
+  materialCode: string;
+  itemName: string;
+  unitQuantity: number;
+  stockQuantity: number;
+  requiredQuantity: number;
+  shortageQuantity: number;
+  isShortage: boolean;
+  availableCapacity: number;
+}
+
+export interface GetStraightCapacityDetailResponse {
+  serial: string;
+  length: number;
+  isLoopRail: boolean;
+  totalQuantity: number;
+  completedQuantity: number;
+  remainingQuantity: number;
+  capacity: number;
+  effectiveCapacity: number;
+  bomShortageList: StraightBomShortageItem[];
+}

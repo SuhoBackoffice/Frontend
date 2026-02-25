@@ -128,7 +128,6 @@ function NavContent({
           label: '직선 레일',
           href: `${base}/straight/capacity`,
           icon: ClipboardList,
-          disabled: true,
         },
       ],
     },
