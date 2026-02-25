@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": ["Bash(*)", "File(*)", "EditFile(*)", "mcp__ide__getDiagnostics"]
+  },
+  "context": {
+    "maxFiles": 30
+  }
+}

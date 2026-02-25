@@ -15,15 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  PlusCircle,
-  Trash2,
-  Search,
-  ClipboardList,
-  DraftingCompass,
-  Boxes,
-  Package,
-} from 'lucide-react';
+import { Trash2, Search, ClipboardList, DraftingCompass, Boxes, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { SubmitButton } from './SubmitButton';
 import { ApiError } from '@/types/api.types';
@@ -32,10 +24,10 @@ import { useRouter } from 'next/navigation';
 
 interface MaterialRow {
   id: string;
+  projectMaterialStockId: number;
   drawingNumber: string;
   itemName: string;
   quantity: string;
-  isManual: boolean;
 }
 
 interface ProjectMaterialRegisterComponentProps {
@@ -61,39 +53,28 @@ export default function ProjectMaterialRegisterComponent({
   const [isSearching, setIsSearching] = useState(false);
 
   const handleAddFromSearch = (result: GetMaterialSearchResponse) => {
-    if (rows.some((row) => row.drawingNumber === result.drawingNumber)) {
+    if (rows.some((row) => row.projectMaterialStockId === result.id)) {
       toast.warning('이미 목록에 추가된 자재입니다.');
       return;
     }
     const newRow: MaterialRow = {
       id: crypto.randomUUID(),
+      projectMaterialStockId: result.id,
       drawingNumber: result.drawingNumber,
       itemName: result.itemName,
-      quantity: '0',
-      isManual: false,
+      quantity: '1',
     };
     setRows((prevRows) => [...prevRows, newRow]);
     setSearchKeyword('');
     setSearchPopoverOpen(false);
   };
 
-  const handleAddManualRow = () => {
-    const newRow: MaterialRow = {
-      id: crypto.randomUUID(),
-      drawingNumber: '',
-      itemName: '',
-      quantity: '0',
-      isManual: true,
-    };
-    setRows((prevRows) => [...prevRows, newRow]);
-  };
-
   const handleRemoveRow = (id: string) => {
     setRows(rows.filter((row) => row.id !== id));
   };
 
-  const handleRowChange = (id: string, field: keyof MaterialRow, value: string) => {
-    setRows(rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)));
+  const handleQuantityChange = (id: string, value: string) => {
+    setRows(rows.map((row) => (row.id === id ? { ...row, quantity: value } : row)));
   };
 
   useEffect(() => {
@@ -164,9 +145,9 @@ export default function ProjectMaterialRegisterComponent({
     <form action={formAction}>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold tracking-tight">자재 입고 등록</CardTitle>
-          <CardDescription className="pt-1 text-base">
-            아래 검색창을 통해 자재를 추가하거나, 수동으로 입력하여 등록할 수 있습니다.
+          <CardTitle className="text-2xl font-bold tracking-tight">자재 입고 등록</CardTitle>
+          <CardDescription className="pt-1">
+            아래 검색창을 통해 자재를 검색하고 목록에 추가한 뒤 수량을 입력해 등록할 수 있습니다.
           </CardDescription>
         </CardHeader>
 
@@ -187,24 +168,39 @@ export default function ProjectMaterialRegisterComponent({
                   />
                 </div>
               </PopoverTrigger>
-              <PopoverContent style={{ width: `${contentWidth}px` }} className="p-1" align="start">
+              <PopoverContent style={{ width: `${contentWidth}px` }} className="p-2" align="start">
                 <div>
                   {isSearching ? (
-                    <div className="text-muted-foreground p-2 text-center text-sm">검색 중...</div>
+                    <div className="text-muted-foreground py-4 text-center text-sm">검색 중...</div>
                   ) : searchResults.length > 0 ? (
-                    <ul className="max-h-60 overflow-y-auto" key={JSON.stringify(searchResults)}>
+                    <ul
+                      className="flex max-h-72 flex-col gap-1.5 overflow-y-auto"
+                      key={JSON.stringify(searchResults)}
+                    >
                       {searchResults.map((result) => (
                         <li
                           key={result.id}
                           onClick={() => handleAddFromSearch(result)}
-                          className="hover:bg-accent cursor-pointer rounded-sm px-2 py-1.5 text-sm"
+                          className="hover:bg-accent focus-visible:bg-accent cursor-pointer rounded-md border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none"
                         >
-                          {result.drawingNumber} ({result.itemName})
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1 space-y-0.5">
+                              <p className="text-foreground truncate font-medium">
+                                {result.drawingNumber}
+                              </p>
+                              <p className="text-muted-foreground line-clamp-2 text-sm">
+                                {result.itemName}
+                              </p>
+                            </div>
+                            <span className="text-muted-foreground bg-muted shrink-0 rounded px-2 py-0.5 text-xs font-medium">
+                              입고 필요 {result.needInboundQuantity}개
+                            </span>
+                          </div>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <div className="text-muted-foreground p-2 text-center text-sm">
+                    <div className="text-muted-foreground py-4 text-center text-sm">
                       {debouncedKeyword.length < 2
                         ? '검색어는 최소 2글자 이상입니다.'
                         : '검색 결과가 없습니다.'}
@@ -217,15 +213,9 @@ export default function ProjectMaterialRegisterComponent({
 
           {/* 2. 등록할 자재 목록 */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="h-6 w-6" />
-                <h3 className="text-xl font-semibold tracking-tight">등록할 자재 목록</h3>
-              </div>
-              <Button variant="outline" type="button" onClick={handleAddManualRow}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                수동으로 추가
-              </Button>
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-6 w-6" />
+              <h3 className="text-xl font-semibold tracking-tight">등록할 자재 목록</h3>
             </div>
 
             <div className="space-y-3">
@@ -235,37 +225,19 @@ export default function ProjectMaterialRegisterComponent({
                     key={row.id}
                     className="bg-muted/20 grid grid-cols-1 items-start gap-4 rounded-lg border p-4 md:grid-cols-[1fr_1fr_150px_auto]"
                   >
-                    {/* 도면 번호 */}
+                    {/* 도면 번호 (표시용) */}
                     <div>
                       <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
                         <DraftingCompass className="h-4 w-4" /> 도면 번호
                       </label>
-                      <Input
-                        value={row.drawingNumber}
-                        onChange={(e) => handleRowChange(row.id, 'drawingNumber', e.target.value)}
-                        readOnly={!row.isManual}
-                      />
-                      {state.errors?.[index]?.drawingNumber && (
-                        <p className="text-destructive mt-1 text-sm">
-                          {state.errors[index].drawingNumber}
-                        </p>
-                      )}
+                      <Input value={row.drawingNumber} readOnly className="bg-muted" />
                     </div>
-                    {/* 품명 */}
+                    {/* 품명 (표시용) */}
                     <div>
                       <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
                         <Package className="h-4 w-4" /> 품명
                       </label>
-                      <Input
-                        value={row.itemName}
-                        onChange={(e) => handleRowChange(row.id, 'itemName', e.target.value)}
-                        readOnly={!row.isManual}
-                      />
-                      {state.errors?.[index]?.itemName && (
-                        <p className="text-destructive mt-1 text-sm">
-                          {state.errors[index].itemName}
-                        </p>
-                      )}
+                      <Input value={row.itemName} readOnly className="bg-muted" />
                     </div>
                     {/* 수량 */}
                     <div>
@@ -274,8 +246,9 @@ export default function ProjectMaterialRegisterComponent({
                       </label>
                       <Input
                         type="number"
+                        min={1}
                         value={row.quantity}
-                        onChange={(e) => handleRowChange(row.id, 'quantity', e.target.value)}
+                        onChange={(e) => handleQuantityChange(row.id, e.target.value)}
                       />
                       {state.errors?.[index]?.quantity && (
                         <p className="text-destructive mt-1 text-sm">
@@ -300,7 +273,7 @@ export default function ProjectMaterialRegisterComponent({
                   <ClipboardList className="text-muted-foreground/50 h-10 w-10" />
                   <p className="mt-4 text-base font-semibold">등록할 자재가 없습니다</p>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    상단에서 검색하거나 수동으로 자재를 추가해주세요.
+                    상단 검색창에서 자재를 검색해 목록에 추가해주세요.
                   </p>
                 </div>
               )}
@@ -310,11 +283,16 @@ export default function ProjectMaterialRegisterComponent({
           <input
             type="hidden"
             name="materialsData"
-            value={JSON.stringify(rows.map(({ id, isManual, ...rest }) => rest))}
+            value={JSON.stringify(
+              rows.map((row) => ({
+                projectMaterialStockId: row.projectMaterialStockId,
+                quantity: Number(row.quantity) || 1,
+              }))
+            )}
           />
         </CardContent>
 
-        <CardFooter className="flex justify-end border-t pt-6">
+        <CardFooter className="flex justify-end !border-t-0">
           {state.message && !state.success && (
             <p className="text-destructive mr-4 text-sm">{state.message}</p>
           )}

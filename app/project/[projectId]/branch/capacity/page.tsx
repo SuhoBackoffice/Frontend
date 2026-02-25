@@ -1,6 +1,5 @@
-import { getProjectBranchCapacity } from '@/lib/api/project/project.api';
-import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
 import ProjectBranchCapacityMain from './_components/ProjectBranchCapacityMain';
 import ProjectBranchCapacityMainLoading from './_components/ProjectBranchCapacityMain.Loading';
 
@@ -10,7 +9,7 @@ export async function generateMetadata() {
   return { title: `생산 관리 - 분기 레일` };
 }
 
-export default async function BranchRailRegister({ params }: { params: Params }) {
+export default async function BranchCapacityPage({ params }: { params: Params }) {
   const { projectId } = await params;
   const id = Number(projectId);
 
@@ -18,11 +17,9 @@ export default async function BranchRailRegister({ params }: { params: Params })
     notFound();
   }
 
-  const projectBranchCapacity = getProjectBranchCapacity({ projectId: id });
-
   return (
     <Suspense fallback={<ProjectBranchCapacityMainLoading />}>
-      <ProjectBranchCapacityMain promiseData={projectBranchCapacity} projectId={id} />
+      <ProjectBranchCapacityMain projectId={id} />
     </Suspense>
   );
 }

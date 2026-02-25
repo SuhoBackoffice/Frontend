@@ -7,6 +7,9 @@ import {
   GetProjectDetailRequest,
   PostProjectStraightRequest,
   GetProjectBranchCapacityRequest,
+  GetBranchCapacityDetailRequest,
+  GetProjectStraightCapacityRequest,
+  GetStraightCapacityDetailRequest,
   //응답
   ProjectSearchSortResponse,
   ProjectInfoResponse,
@@ -18,8 +21,14 @@ import {
   PostProjectBranchRegisterResponse,
   PatchProjectBranchRequest,
   GetProjectBranchCapacityResponse,
+  BranchCapacitySortType,
+  GetBranchCapacityDetailResponse,
   GetProjectOnGoingList,
+  GetProjectStraightCapacityResponse,
+  StraightCapacitySortType,
+  GetStraightCapacityDetailResponse,
 } from '@/types/project/project.types';
+import { BranchDetailResponse } from '@/types/branch/branch.types';
 
 export async function postNewProject(data: NewProjectRequest): Promise<ApiResponse<null>> {
   return fetchApi<null>('/project/new', {
@@ -79,10 +88,13 @@ export async function getProjectDetail(
 }
 
 export async function getProjectStraightDetail(
-  params: GetProjectDetailRequest
-): Promise<ApiResponse<ProjectInfoStraightResponse[]>> {
-  const { projectId } = params;
-  return fetchApi<ProjectInfoStraightResponse[]>(`/project/${projectId}/straight`, {
+  projectId: number,
+  length?: string
+): Promise<ApiResponse<ProjectInfoStraightResponse>> {
+  const url = length
+    ? `/project/${projectId}/straight?length=${length}`
+    : `/project/${projectId}/straight`;
+  return fetchApi<ProjectInfoStraightResponse>(url, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -92,10 +104,26 @@ export async function getProjectStraightDetail(
 }
 
 export async function getProjectBranchDetail(
-  params: GetProjectDetailRequest
+  projectId: number,
+  keyword?: string
 ): Promise<ApiResponse<ProjectInfoBranchResponse[]>> {
-  const { projectId } = params;
-  return fetchApi<ProjectInfoBranchResponse[]>(`/project/${projectId}/branch`, {
+  const url = keyword
+    ? `/project/${projectId}/branch?keyword=${keyword}`
+    : `/project/${projectId}/branch`;
+  return fetchApi<ProjectInfoBranchResponse[]>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export async function getProjectBranchDetailById(
+  projectId: number,
+  projectBranchId: number
+): Promise<ApiResponse<BranchDetailResponse>> {
+  return fetchApi<BranchDetailResponse>(`/project/${projectId}/branch/${projectBranchId}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -190,9 +218,113 @@ export function getProjectQuantityList(projectId: number): Promise<FileResponse>
 export function getProjectBranchCapacity(
   data: GetProjectBranchCapacityRequest
 ): Promise<ApiResponse<GetProjectBranchCapacityResponse[]>> {
-  const { projectId } = data;
+  const { projectId, sort, dir } = data;
+  const queryParams = new URLSearchParams();
+  if (sort) queryParams.append('sort', sort);
+  if (dir) queryParams.append('dir', dir);
+  const queryString = queryParams.toString();
+  const url = `/project/${projectId}/branch/capacity${queryString ? `?${queryString}` : ''}`;
 
-  return fetchApi<GetProjectBranchCapacityResponse[]>(`/project/${projectId}/branch/capacity`, {
+  return fetchApi<GetProjectBranchCapacityResponse[]>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectBranchCapacitySortTypes(): Promise<ApiResponse<BranchCapacitySortType[]>> {
+  return fetchApi<BranchCapacitySortType[]>('/project/branch/capacity/types', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectBranchCapacityDetail(
+  data: GetBranchCapacityDetailRequest
+): Promise<ApiResponse<GetBranchCapacityDetailResponse>> {
+  const { projectId, projectBranchId, sort, dir, onlyShortage } = data;
+  const queryParams = new URLSearchParams();
+  if (sort) queryParams.append('sort', sort);
+  if (dir) queryParams.append('dir', dir);
+  if (onlyShortage !== undefined) queryParams.append('onlyShortage', String(onlyShortage));
+  const queryString = queryParams.toString();
+  const url = `/project/${projectId}/branch/${projectBranchId}/capacity${queryString ? `?${queryString}` : ''}`;
+
+  return fetchApi<GetBranchCapacityDetailResponse>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectBranchCapacityAnalyzeSortTypes(): Promise<ApiResponse<BranchCapacitySortType[]>> {
+  return fetchApi<BranchCapacitySortType[]>('/project/branch/capacity/analyze/types', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectStraightCapacity(
+  data: GetProjectStraightCapacityRequest
+): Promise<ApiResponse<GetProjectStraightCapacityResponse[]>> {
+  const { projectId, sort, dir } = data;
+  const queryParams = new URLSearchParams();
+  if (sort) queryParams.append('sort', sort);
+  if (dir) queryParams.append('dir', dir);
+  const queryString = queryParams.toString();
+  const url = `/project/${projectId}/straight/capacity${queryString ? `?${queryString}` : ''}`;
+
+  return fetchApi<GetProjectStraightCapacityResponse[]>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectStraightCapacitySortTypes(): Promise<ApiResponse<StraightCapacitySortType[]>> {
+  return fetchApi<StraightCapacitySortType[]>('/project/straight/capacity/types', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectStraightCapacityDetail(
+  data: GetStraightCapacityDetailRequest
+): Promise<ApiResponse<GetStraightCapacityDetailResponse>> {
+  const { projectId, projectStraightId, sort, dir, onlyShortage } = data;
+  const queryParams = new URLSearchParams();
+  if (sort) queryParams.append('sort', sort);
+  if (dir) queryParams.append('dir', dir);
+  if (onlyShortage !== undefined) queryParams.append('onlyShortage', String(onlyShortage));
+  const queryString = queryParams.toString();
+  const url = `/project/${projectId}/straight/${projectStraightId}/capacity${queryString ? `?${queryString}` : ''}`;
+
+  return fetchApi<GetStraightCapacityDetailResponse>(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function getProjectStraightCapacityAnalyzeSortTypes(): Promise<ApiResponse<StraightCapacitySortType[]>> {
+  return fetchApi<StraightCapacitySortType[]>('/project/straight/capacity/analyze/types', {
     method: 'GET',
     credentials: 'include',
     headers: {

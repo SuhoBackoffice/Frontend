@@ -22,7 +22,7 @@ export default function ReportTopFilter({
   ];
 
   return (
-    <div className="scrollbar-hide flex items-center justify-center gap-2 overflow-x-auto p-3">
+    <div className="bg-card scrollbar-hide flex items-center justify-center gap-2 overflow-x-auto rounded-2xl border p-4 shadow-sm">
       {filters.map((f) => {
         const isActive = currentStatus === f.value;
         const style = f.value ? STATUS_STYLE[f.value as StatusType] : null;
@@ -36,16 +36,16 @@ export default function ReportTopFilter({
               isActive
                 ? style
                   ? `${style.badge} border-transparent text-white shadow-md`
-                  : 'border-slate-900 bg-slate-900 text-white shadow-md'
+                  : 'bg-foreground text-background border-transparent shadow-md'
                 : style
-                  ? `${style.surface} ${style.text} border-transparent hover:border-current` // 비활성 시에도 상태 색상 유지
-                  : 'text-muted-foreground border-slate-200 bg-slate-50 hover:border-slate-300'
+                  ? `${style.surface} ${style.text} border-transparent hover:border-current`
+                  : 'text-muted-foreground bg-muted border-transparent hover:bg-muted/70'
             )}
           >
             <f.icon
               className={cn(
                 'h-4 w-4',
-                isActive ? 'text-white' : style ? style.text : 'text-slate-400'
+                isActive ? (style ? 'text-white' : 'text-background') : style ? style.text : 'text-muted-foreground'
               )}
             />
             {f.label}

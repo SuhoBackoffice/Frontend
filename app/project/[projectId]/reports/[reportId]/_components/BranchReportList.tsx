@@ -6,7 +6,7 @@ export const BranchReportList = ({ reports }: { reports: BranchWorkReportRespons
   const totalQty = reports.reduce((sum, r) => sum + r.productionQuantity, 0);
 
   return (
-    <div className="space-y-4">
+    <div className="bg-card space-y-4 rounded-2xl border p-6 shadow-sm">
       <div className="flex items-center gap-2">
         <GitBranch className="h-5 w-5" />
         <h3 className="text-2xl font-bold">분기레일 생산 실적</h3>
@@ -18,7 +18,7 @@ export const BranchReportList = ({ reports }: { reports: BranchWorkReportRespons
           reports.map((item) => (
             <div
               key={item.branchSerial}
-              className="flex flex-col gap-3 rounded-lg border px-4 py-3 md:flex-row md:items-center md:justify-between"
+              className="bg-background flex flex-col gap-3 rounded-lg border px-4 py-3 md:flex-row md:items-center md:justify-between"
             >
               {/* Left */}
               <div className="space-y-2">
@@ -44,7 +44,7 @@ export const BranchReportList = ({ reports }: { reports: BranchWorkReportRespons
             </div>
           ))
         ) : (
-          <div className="border-border flex flex-col items-center justify-center rounded-lg border border-dashed py-10">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-10">
             <p className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
               분기 레일 생산 정보 없음
             </p>

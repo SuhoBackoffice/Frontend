@@ -1,39 +1,32 @@
-import { getMaterialHistory } from '@/lib/api/material/material.api';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
 import ProjectMaterialHistoryMain from './_components/ProjectMaterialHistoryMain';
-import ProjectMaterialHistoryMainLoading from './_components/ProjectMaterialHistoryMain.Loading';
 
 interface ProjectMaterialHistoryPageProps {
   params: Promise<{ projectId: string }>;
   searchParams: Promise<{ keyword?: string }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: `자재 입고 이력 확인` };
-}
+export const metadata: Metadata = {
+  title: '자재 입고 이력',
+};
 
-export default async function ProjectMaterialHistroyPage({
+export default async function ProjectMaterialHistoryPage({
   params,
   searchParams,
 }: ProjectMaterialHistoryPageProps) {
   const { projectId } = await params;
-  const id = Number(projectId);
   const { keyword } = await searchParams;
+  const id = Number(projectId);
 
   if (!Number.isSafeInteger(id) || id <= 0) {
     notFound();
   }
 
-  const materialHistory = getMaterialHistory({
-    projectId: id,
-    keyword: keyword,
-  });
-
   return (
-    <Suspense fallback={<ProjectMaterialHistoryMainLoading />}>
-      <ProjectMaterialHistoryMain promiseData={materialHistory} projectId={id} />
-    </Suspense>
+    <ProjectMaterialHistoryMain
+      projectId={id}
+      initialKeyword={keyword ?? ''}
+    />
   );
 }

@@ -1,355 +1,192 @@
 'use client';
 
-import { useState, useTransition, use, useMemo, useCallback } from 'react';
+import { useState, use, useTransition, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Check,
-  X,
-  ChevronDown,
-  ChevronUp,
-  ChevronsUpDown,
-} from 'lucide-react';
+import { Loader2, X, ChevronRight, ArrowRight, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { updateStraightRailAction } from '@/lib/action/straight.action';
-import { deleteProjectStraight } from '@/lib/api/project/project.api';
-import { ApiResponse } from '@/types/api.types';
-import { ProjectInfoStraightResponse } from '@/types/project/project.types';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  ColumnDef,
-  SortingState,
-  flexRender,
-  getFilteredRowModel,
-} from '@tanstack/react-table';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { ApiResponse, ApiError } from '@/types/api.types';
+import { ProjectInfoStraightResponse, StraightListItem } from '@/types/project/project.types';
+import { getProjectStraightDetail } from '@/lib/api/project/project.api';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 
 interface ProjectStraightProps {
-  promiseData: Promise<ApiResponse<ProjectInfoStraightResponse[]>>;
+  promiseData: Promise<ApiResponse<ProjectInfoStraightResponse>>;
   projectId: number;
 }
-
-type EditFormData = {
-  totalQuantity: number | '';
-};
-
-type StraightRail = ProjectInfoStraightResponse;
 
 export default function ProjectStraightDetail({ promiseData, projectId }: ProjectStraightProps) {
   const initialData = use(promiseData).data!;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [straights, setStraights] = useState(initialData);
-  const [editingRowId, setEditingRowId] = useState<number | null>(null);
-  const [editFormData, setEditFormData] = useState<EditFormData>({ totalQuantity: '' });
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [data, setData] = useState(initialData);
+  const [lengthInput, setLengthInput] = useState('');
+  const isFirstRender = useRef(true);
 
-  const onRegisterClick = () => {
-    router.push(`/project/${projectId}/straight/register`);
-  };
+  const debouncedLength = useDebounce(lengthInput, 500);
 
-  const handleEditClick = useCallback((straight: StraightRail) => {
-    setEditingRowId(straight.straightRailId);
-    setEditFormData({ totalQuantity: straight.totalQuantity });
-    setFieldErrors({});
-  }, []);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    startTransition(async () => {
+      try {
+        const result = await getProjectStraightDetail(projectId, debouncedLength || undefined);
+        setData(result.data!);
+      } catch (err) {
+        const message =
+          err instanceof ApiError ? err.message : '데이터를 불러오는 중 오류가 발생했습니다.';
+        toast.error(message);
+      }
+    });
+  }, [debouncedLength, projectId]);
 
-  const handleCancelClick = useCallback(() => {
-    setEditingRowId(null);
-    setFieldErrors({});
-  }, []);
-
-  const handleSaveClick = useCallback(
-    (straightRailId: number) => {
-      startTransition(async () => {
-        const result = await updateStraightRailAction(straightRailId, editFormData);
-
-        if (result.success) {
-          toast.success(result.message);
-          setEditingRowId(null);
-          setStraights(
-            straights.map((straight) =>
-              straight.straightRailId === straightRailId
-                ? { ...straight, totalQuantity: editFormData.totalQuantity as number }
-                : straight
-            )
-          );
-        } else {
-          toast.error(result.message);
-          if (result.errors) {
-            setFieldErrors(result.errors);
-          }
-        }
-      });
-    },
-    [editFormData, straights]
-  );
-
-  const handleDeleteClick = useCallback(
-    (straightRailId: number) => {
-      startTransition(async () => {
-        const result = await deleteProjectStraight(straightRailId);
-        if (result.isSuccess) {
-          toast.success(result.message);
-          setStraights(straights.filter((straight) => straight.straightRailId !== straightRailId));
-        } else {
-          toast.error(result.message);
-        }
-      });
-    },
-    [straights]
-  );
-
-  const columns = useMemo<ColumnDef<StraightRail>[]>(
-    () => [
-      { accessorKey: 'length', header: '길이', cell: (info) => info.getValue() },
-      { accessorKey: 'straightType', header: '타입', cell: (info) => info.getValue() },
-      {
-        accessorKey: 'totalQuantity',
-        header: '수량',
-        cell: (info) => {
-          const straight = info.row.original;
-          const isEditing = editingRowId === straight.straightRailId;
-          const totalQuantityError = fieldErrors?.totalQuantity?.[0];
-          return (
-            <div className="flex flex-col items-center">
-              {isEditing ? (
-                <>
-                  <Input
-                    type="number"
-                    className={`mx-auto h-8 w-20 text-center ${totalQuantityError ? 'border-red-500' : ''}`}
-                    value={editFormData.totalQuantity}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, totalQuantity: Number(e.target.value) })
-                    }
-                    autoFocus
-                  />
-                  {totalQuantityError && (
-                    <p className="mt-1 text-xs text-red-500">{totalQuantityError}</p>
-                  )}
-                </>
-              ) : (
-                straight.totalQuantity
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: 'isLoopRail',
-        header: '루프레일',
-        cell: (info) => (info.getValue() ? '✅' : '❌'),
-      },
-      {
-        accessorKey: 'holePosition',
-        header: '가공',
-        cell: (info) => (info.getValue() === 0 ? '❌' : info.getValue()),
-      },
-      { accessorKey: 'litzInfo.litz1', header: 'Litz1', cell: (info) => info.getValue() },
-      { accessorKey: 'litzInfo.litz2', header: 'Litz2', cell: (info) => info.getValue() },
-      { accessorKey: 'litzInfo.litz3', header: 'Litz3', cell: (info) => info.getValue() },
-      { accessorKey: 'litzInfo.litz4', header: 'Litz4', cell: (info) => info.getValue() },
-      { accessorKey: 'litzInfo.litz5', header: 'Litz5', cell: (info) => info.getValue() },
-      { accessorKey: 'litzInfo.litz6', header: 'Litz6', cell: (info) => info.getValue() },
-      {
-        id: 'actions',
-        header: '관리',
-        cell: (info) => {
-          const straight = info.row.original;
-          const isEditing = editingRowId === straight.straightRailId;
-          return (
-            <div className="text-center">
-              {isEditing ? (
-                <div className="flex justify-center gap-2">
-                  <Button
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handleSaveClick(straight.straightRailId)}
-                    disabled={isPending}
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="h-8 w-8"
-                    onClick={handleCancelClick}
-                    disabled={isPending}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex justify-center gap-2">
-                  <Button
-                    size="icon"
-                    variant="default"
-                    className="h-8 w-8"
-                    onClick={() => handleEditClick(straight)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="icon" variant="destructive" className="h-8 w-8">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>정말 삭제하시겠습니까?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          이 작업은 되돌릴 수 없습니다. 해당 직선 레일 정보가 영구적으로 삭제됩니다.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>취소</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDeleteClick(straight.straightRailId)}
-                          disabled={isPending}
-                        >
-                          삭제
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              )}
-            </div>
-          );
-        },
-      },
-    ],
-    [
-      editingRowId,
-      fieldErrors,
-      isPending,
-      editFormData,
-      handleSaveClick,
-      handleEditClick,
-      handleCancelClick,
-      handleDeleteClick,
-    ]
-  );
-
-  const table = useReactTable({
-    data: straights,
-    columns,
-    state: {
-      sorting,
-      globalFilter,
-    },
-    onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-  });
+  const total = data.normalStraightList.length + data.loopStraightList.length;
 
   return (
-    <Card>
-      <CardHeader className="grid grid-cols-[120px_auto_auto] items-center gap-4 text-2xl font-bold">
-        <CardTitle className="justify-self-start">직선 레일</CardTitle>
-        <div className="justify-self-start">
-          <Input
-            value={globalFilter ?? ''}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="키워드를 입력해 주세요..."
-            className="h-10 w-80 !text-xl"
-          />
+    <Card className="!gap-2">
+      <CardHeader className="grid grid-cols-[auto_1fr] items-center gap-4">
+        {/* 왼쪽 */}
+        <div className="flex items-center gap-3">
+          <CardTitle className="text-2xl font-bold">직선 레일</CardTitle>
+          <Badge variant="secondary" className="text-sm font-medium">
+            총 {total}종
+          </Badge>
         </div>
-        <div className="justify-self-end">
-          <Button variant="default" onClick={onRegisterClick} className="h-auto px-3 py-1 text-lg">
-            <Plus className="mr-2 h-4 w-4" />
-            추가 등록
-          </Button>
+
+        {/* 오른쪽 */}
+        <div className="relative w-full">
+          <Input
+            type="number"
+            placeholder="길이(mm) 검색..."
+            className="h-9 w-full pr-8"
+            value={lengthInput}
+            onChange={(e) => setLengthInput(e.target.value)}
+          />
+          <div className="absolute top-1/2 right-2.5 -translate-y-1/2">
+            {isPending ? (
+              <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
+            ) : lengthInput ? (
+              <button
+                onClick={() => setLengthInput('')}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            ) : null}
+          </div>
         </div>
       </CardHeader>
 
-      <CardContent>
-        <Table className="border text-lg [&_td]:px-2 [&_td]:py-1 [&_th]:px-2 [&_th]:py-1">
-          <TableHeader className="border-b">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="divide-x">
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    className="w-auto text-center font-bold"
-                  >
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className="flex cursor-pointer items-center justify-center select-none"
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getIsSorted() &&
-                          (header.column.getIsSorted() === 'asc' ? (
-                            <ChevronUp className="ml-2 h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="ml-2 h-4 w-4" />
-                          ))}
-                        {!header.column.getIsSorted() && (
-                          <ChevronsUpDown className="ml-2 h-4 w-4" />
-                        )}
-                      </div>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="divide-y">
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className={`divide-x ${row.index % 2 === 0 ? 'bg-background' : 'bg-accent/50'} hover:bg-accent`}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-center">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
-                  Straight 정보가 없습니다.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+      <CardContent className="space-y-6">
+        {/* 일반 레일 */}
+        <section>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              일반 레일
+            </span>
+            <Badge variant="outline" className="text-xs">
+              {data.normalStraightList.length}
+            </Badge>
+          </div>
+          {data.normalStraightList.length === 0 ? (
+            <p className="text-muted-foreground py-6 text-center text-sm">
+              등록된 일반 레일이 없습니다.
+            </p>
+          ) : (
+            <div className="divide-border/50 bg-muted/20 divide-y overflow-hidden rounded-lg">
+              {data.normalStraightList.map((rail) => (
+                <RailItem
+                  key={rail.straightRailId}
+                  rail={rail}
+                  isLoop={false}
+                  onClick={() =>
+                    router.push(`/project/${projectId}/straight/${rail.straightRailId}`)
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* 루프 레일 */}
+        <section>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              루프 레일
+            </span>
+            <Badge variant="outline" className="text-xs">
+              {data.loopStraightList.length}
+            </Badge>
+          </div>
+          {data.loopStraightList.length === 0 ? (
+            <p className="text-muted-foreground py-6 text-center text-sm">
+              등록된 루프 레일이 없습니다.
+            </p>
+          ) : (
+            <div className="divide-border/50 bg-muted/20 divide-y overflow-hidden rounded-lg">
+              {data.loopStraightList.map((rail) => (
+                <RailItem
+                  key={rail.straightRailId}
+                  rail={rail}
+                  isLoop={true}
+                  onClick={() =>
+                    router.push(`/project/${projectId}/straight/${rail.straightRailId}`)
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </section>
       </CardContent>
     </Card>
+  );
+}
+
+interface RailItemProps {
+  rail: StraightListItem;
+  isLoop: boolean;
+  onClick: () => void;
+}
+
+function RailItem({ rail, isLoop, onClick }: RailItemProps) {
+  const progress = rail.totalQuantity > 0 ? (rail.completedQuantity / rail.totalQuantity) * 100 : 0;
+  const isDone = rail.completedQuantity >= rail.totalQuantity && rail.totalQuantity > 0;
+  const Icon = isLoop ? RefreshCw : ArrowRight;
+
+  return (
+    <button
+      onClick={onClick}
+      className="group hover:bg-accent/60 flex w-full items-center gap-4 px-4 py-3 text-left transition-colors"
+    >
+      <div className="bg-primary/10 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+        <Icon className="h-4 w-4" />
+      </div>
+
+      <div className="w-52 shrink-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-semibold">{rail.serial}</span>
+          {isLoop && rail.holePosition != null && rail.holePosition > 0 && (
+            <span className="text-muted-foreground text-xs">가공: {rail.holePosition}mm</span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-1 items-center gap-3">
+        <Progress value={progress} className="h-2 flex-1" />
+        <div className="flex w-36 shrink-0 items-baseline gap-1">
+          <span className={`text-base font-bold ${isDone ? 'text-primary' : 'text-foreground'}`}>
+            {rail.completedQuantity}
+          </span>
+          <span className="text-muted-foreground text-xs">/ {rail.totalQuantity}개 생산 완료</span>
+        </div>
+      </div>
+
+      <ChevronRight className="text-muted-foreground group-hover:text-primary h-4 w-4 shrink-0 transition-colors" />
+    </button>
   );
 }

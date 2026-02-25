@@ -6,8 +6,7 @@ import { ApiError } from '@/types/api.types';
 import { MaterialInboundItemRequest } from '@/types/material/material.types';
 
 const materialItemSchema = z.object({
-  drawingNumber: z.string().min(1, '도면 번호는 필수 입력입니다.'),
-  itemName: z.string().min(1, '품명은 필수 입력입니다.'),
+  projectMaterialStockId: z.number().int().min(0, '자재 ID가 올바르지 않습니다.'),
   quantity: z.coerce.number().int().min(1, '수량은 1 이상이어야 합니다.'),
 });
 
@@ -28,8 +27,7 @@ const createInboundMaterialsSchema = z
   .pipe(z.array(materialItemSchema).min(1, '최소 하나 이상의 자재 정보를 추가해주세요.'));
 
 type RowError = {
-  drawingNumber?: string;
-  itemName?: string;
+  projectMaterialStockId?: string;
   quantity?: string;
 };
 

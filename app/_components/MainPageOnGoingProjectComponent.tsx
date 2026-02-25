@@ -12,8 +12,161 @@ import { useAuthStore } from '@/lib/store/auth.store';
 import { GetProjectOnGoingList } from '@/types/project/project.types';
 import { getOnGoingProjectList } from '@/lib/api/project/project.api';
 
+function calculateDday(endDate: string): number | 'DAY' | '종료' {
+  const today = new Date();
+  const end = new Date(endDate);
+  today.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+  const diff = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  if (diff > 0) return diff;
+  if (diff === 0) return 'DAY';
+  return '종료';
+}
+
+function calcProgress(startDate: string, endDate: string): number {
+  const start = new Date(startDate).getTime();
+  const end = new Date(endDate).getTime();
+  const now = Date.now();
+  if (now <= start) return 0;
+  if (now >= end) return 100;
+  return Math.round(((now - start) / (end - start)) * 100);
+}
+
+// ── Project Card ──────────────────────────────────────────────────────────────
+
+function ProjectCard({ project }: { project: GetProjectOnGoingList }) {
+  const dday = calculateDday(project.endDate);
+  const progress = calcProgress(project.startDate, project.endDate);
+
+  const ddayDisplay = dday === 'DAY' ? 'D-DAY' : dday === '종료' ? '종료' : String(dday);
+  const showDaysLeft = typeof dday === 'number';
+
+  return (
+    <Card className="bg-card overflow-hidden !rounded-2xl !border-none !p-0 shadow-sm">
+      <div className="bg-primary/30 h-1 w-full" />
+
+      <CardContent className="relative overflow-hidden p-8">
+        <div className="from-primary/5 pointer-events-none absolute -top-10 -right-10 h-52 w-52 rounded-full bg-gradient-to-br to-transparent" />
+
+        {/* Row 1: 태그 + 연도 */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold">
+              <Tag className="h-3 w-3" />
+              {project.version}
+            </span>
+            <span className="bg-muted text-muted-foreground inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold">
+              <MapPin className="h-3 w-3" />
+              {project.region}
+            </span>
+          </div>
+          <span className="text-muted-foreground font-mono text-xs">
+            {project.startDate.slice(0, 4)}
+          </span>
+        </div>
+
+        {/* Row 2: 프로젝트명 + D-day */}
+        <div className="mb-6 flex items-start justify-between gap-6">
+          <div className="min-w-0 flex-1">
+            <p className="text-muted-foreground mb-2 text-xs font-semibold tracking-widest uppercase">
+              Project Name
+            </p>
+            <h3 className="text-foreground line-clamp-2 text-2xl leading-tight font-black md:text-3xl">
+              {project.name}
+            </h3>
+          </div>
+
+          <div className="shrink-0 text-right">
+            <p className="text-muted-foreground mb-1 text-xs font-semibold tracking-widest uppercase">
+              Deadline
+            </p>
+            <div className="text-primary font-mono text-5xl leading-none font-black tabular-nums md:text-6xl">
+              {ddayDisplay}
+            </div>
+            {showDaysLeft && (
+              <p className="text-muted-foreground mt-1 text-right text-xs">days left</p>
+            )}
+          </div>
+        </div>
+
+        {/* Row 3: 타임라인 진행바 */}
+        <div className="mb-6">
+          <div className="text-muted-foreground mb-2 flex items-center justify-between font-mono text-xs">
+            <span>{project.startDate}</span>
+            <span className="text-muted-foreground/60">{progress}% 경과</span>
+            <span>{project.endDate}</span>
+          </div>
+          <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+            <div
+              className="bg-primary h-full rounded-full transition-all duration-700"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Row 4: 버튼 */}
+        <div className="flex gap-3 border-t pt-6">
+          <Button asChild className="flex-1 gap-2">
+            <Link href={`/project/${project.projectId}`}>
+              <ArrowRight className="h-4 w-4" />
+              상세 페이지
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="flex-1 gap-2">
+            <Link href={`/project/${project.projectId}/reports/new`}>
+              <FileText className="h-4 w-4" />
+              업무 보고
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProjectCardSkeleton() {
+  return (
+    <Card className="bg-card overflow-hidden !rounded-2xl !border-none !p-0 shadow-sm">
+      <Skeleton className="h-1 w-full rounded-none" />
+      <CardContent className="p-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-20 rounded-full" />
+            <Skeleton className="h-6 w-16 rounded-full" />
+          </div>
+          <Skeleton className="h-4 w-10" />
+        </div>
+        <div className="mb-6 flex items-start justify-between gap-6">
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-9 w-3/4" />
+          </div>
+          <div className="space-y-2 text-right">
+            <Skeleton className="ml-auto h-3 w-16" />
+            <Skeleton className="h-16 w-20" />
+          </div>
+        </div>
+        <div className="mb-6 space-y-2">
+          <div className="flex justify-between">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <Skeleton className="h-2 w-full rounded-full" />
+        </div>
+        <div className="flex gap-3 border-t pt-6">
+          <Skeleton className="h-10 flex-1 rounded-md" />
+          <Skeleton className="h-10 flex-1 rounded-md" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+
 export default function MainPageOnGoingProject() {
-  const { isLoggedIn, _hasHydrated, user } = useAuthStore();
+  const { isLoggedIn, _hasHydrated } = useAuthStore();
   const [projects, setProjects] = useState<GetProjectOnGoingList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,30 +188,16 @@ export default function MainPageOnGoingProject() {
   if (!isLoggedIn) return <OnGoingProjectBlurOverlay />;
   if (isLoading) return <ProjectSkeleton />;
 
-  function calculateDday(endDate: string) {
-    const today = new Date();
-    const end = new Date(endDate);
-
-    today.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-
-    const diff = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diff > 0) return diff;
-    if (diff === 0) return 'DAY';
-    return '종료';
-  }
-
   return (
-    <section className="py-12">
-      <div className="mb-4 flex flex-col items-center text-center">
-        <h2 className="from-foreground via-primary to-foreground bg-gradient-to-r bg-clip-text pb-2 text-4xl font-black tracking-tighter text-transparent md:text-4xl">
-          진행 중인 프로젝트
-        </h2>
-        <div className="bg-primary mt-4 mb-4 h-1 w-20 rounded-full" />
+    <section className="space-y-4">
+      <div className="flex items-center gap-3">
+        <h2 className="text-foreground text-lg font-bold">진행 중인 프로젝트</h2>
+        <span className="bg-primary/10 text-primary rounded-full px-2.5 py-0.5 text-xs font-semibold">
+          {projects.length}개
+        </span>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4">
+      <div>
         <Carousel
           plugins={[plugin.current]}
           className="w-full"
@@ -69,88 +208,12 @@ export default function MainPageOnGoingProject() {
             {projects.length > 0 ? (
               projects.map((project) => (
                 <CarouselItem key={project.projectId}>
-                  <Card className="bg-card overflow-hidden !rounded-2xl !border-none !p-0 !shadow-none transition-colors duration-300">
-                    <CardContent className="p-0">
-                      <div className="flex h-full flex-col md:flex-row">
-                        <div className="from-primary to-primary/80 text-primary-foreground flex w-full flex-col gap-8 bg-gradient-to-br p-10 md:w-1/4">
-                          <div>
-                            <p className="mb-1 text-sm tracking-widest text-white/70 uppercase">
-                              Version
-                            </p>
-                            <h4 className="flex items-center text-2xl font-bold text-white">
-                              <Tag className="mr-2 h-5 w-5 text-white/80" />
-                              {project.version}
-                            </h4>
-                          </div>
-
-                          <div>
-                            <p className="mb-1 text-sm tracking-widest text-white/70 uppercase">
-                              Region
-                            </p>
-                            <h4 className="flex items-center text-2xl font-bold text-white">
-                              <MapPin className="mr-2 h-5 w-5 text-white/80" />
-                              {project.region}
-                            </h4>
-                          </div>
-                        </div>
-
-                        <div className="bg-card flex w-full flex-col justify-center p-10 md:w-2/3">
-                          <div className="text-primary mb-3 flex items-center text-sm font-semibold tracking-wider uppercase">
-                            <span className="bg-primary mr-3 h-px w-8" />
-                            Project Detail
-                          </div>
-                          <h3 className="text-foreground mb-6 text-3xl leading-tight font-extrabold">
-                            {project.name}
-                          </h3>
-
-                          <div className="mb-8 flex flex-wrap items-center gap-3">
-                            <Calendar className="text-primary h-5 w-5" />
-                            <span className="text-foreground font-semibold">
-                              {project.startDate}
-                            </span>
-                            <span className="text-muted-foreground/40">~</span>
-                            <span className="text-foreground font-semibold">{project.endDate}</span>
-
-                            <div className="bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-bold">
-                              D-{calculateDday(project.endDate)}
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-2 md:flex-row">
-                            <Button
-                              asChild
-                              size="sm"
-                              className="shadow-primary/20 w-full py-6 text-lg shadow-lg transition-all hover:scale-105 md:w-fit"
-                            >
-                              <Link href={`/project/${project.projectId}`}>
-                                <ArrowRight className="ml-2 h-5 w-5" />
-                                상세 페이지
-                              </Link>
-                            </Button>
-
-                            <Button
-                              asChild
-                              size="sm"
-                              className="shadow-primary/20 w-full py-6 text-lg shadow-lg transition-all hover:scale-105 md:w-fit"
-                            >
-                              <Link
-                                aria-disabled
-                                href={`/project/${project.projectId}/reports/new`}
-                              >
-                                <FileText className="ml-2 h-5 w-5" />
-                                업무 보고
-                              </Link>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ProjectCard project={project} />
                 </CarouselItem>
               ))
             ) : (
               <CarouselItem>
-                <div className="text-muted-foreground border-muted w-full rounded-3xl border-2 border-dashed py-20 text-center !text-2xl">
+                <div className="text-muted-foreground border-muted w-full rounded-3xl border-2 border-dashed py-20 text-center text-2xl">
                   현재 진행 중인 프로젝트가 없습니다.
                 </div>
               </CarouselItem>
@@ -162,106 +225,75 @@ export default function MainPageOnGoingProject() {
   );
 }
 
+// ── 비로그인 오버레이 ───────────────────────────────────────────────────────────
+
 function OnGoingProjectBlurOverlay() {
   return (
-    <section className="py-12">
-      {/* 헤더 부분: 메인과 동일한 그라데이션 적용 */}
-      <div className="mb-4 flex flex-col items-center text-center">
-        <h2 className="from-foreground via-primary to-foreground bg-gradient-to-r bg-clip-text pb-2 text-4xl font-black tracking-tighter text-transparent md:text-4xl">
-          진행 중인 프로젝트
-        </h2>
-        <div className="bg-primary mt-4 mb-4 h-1 w-20 rounded-full" />
+    <section className="space-y-4">
+      <div className="flex items-center gap-3">
+        <h2 className="text-foreground text-lg font-bold">진행 중인 프로젝트</h2>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4">
-        {/* 카드 스타일 동기화: !rounded-2xl, shadow-none 제거 후 메인 스타일 반영 */}
-        <div className="bg-card overflow-hidden rounded-2xl border-none shadow-none">
-          <div className="flex flex-col md:flex-row">
-            {/* 왼쪽 영역: 메인과 동일한 그라데이션 및 패딩 */}
-            <div className="from-primary to-primary/80 text-primary-foreground flex w-full flex-col gap-8 bg-gradient-to-br p-10 opacity-70 md:w-1/4">
-              <div>
-                <p className="mb-1 text-sm tracking-widest text-white/70 uppercase">Version</p>
-                <div className="h-8 w-16 animate-pulse rounded-lg bg-white/20" />
-              </div>
+      <div>
+        <Card className="bg-card overflow-hidden !rounded-2xl !border-none !p-0 shadow-sm">
+          <div className="bg-primary/30 h-1 w-full" />
+          <CardContent className="p-8">
+            <div className="mb-6 flex items-center gap-2 opacity-30">
+              <div className="bg-primary/10 h-6 w-20 rounded-full" />
+              <div className="bg-muted h-6 w-16 rounded-full" />
+            </div>
 
-              <div>
-                <p className="mb-1 text-sm tracking-widest text-white/70 uppercase">Region</p>
-                <div className="h-8 w-20 animate-pulse rounded-lg bg-white/20" />
+            <div className="mb-6 flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <p className="text-muted-foreground mb-2 text-xs font-semibold tracking-widest uppercase">
+                  Project Name
+                </p>
+                <h3 className="text-foreground mb-3 text-2xl font-black md:text-3xl">
+                  회원 전용 콘텐츠
+                </h3>
+                <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+                  진행 중인 프로젝트 정보는 로그인한 사용자에게만 공개됩니다.
+                  <br />
+                  우측 상단 버튼으로 로그인해 주세요.
+                </p>
+              </div>
+              <div className="shrink-0 text-right opacity-20">
+                <p className="text-muted-foreground mb-1 text-xs font-semibold tracking-widest uppercase">
+                  Deadline
+                </p>
+                <div className="text-muted-foreground font-mono text-6xl font-black">???</div>
               </div>
             </div>
 
-            {/* 오른쪽 영역: 메인과 동일한 레이아웃 및 'Project Detail' 라인 적용 */}
-            <div className="bg-card flex w-full flex-col justify-center p-10 md:w-3/4">
-              <div className="text-primary mb-3 flex items-center text-sm font-semibold tracking-wider uppercase">
-                <span className="bg-primary mr-3 h-px w-8" />
-                <LockKeyhole className="mr-2 h-4 w-4" />
-                Project Detail
-              </div>
-
-              <h3 className="text-foreground mb-4 text-3xl leading-tight font-extrabold">
-                회원 전용 콘텐츠
-              </h3>
-
-              <p className="text-muted-foreground max-w-md leading-relaxed">
-                진행 중인 프로젝트의 상세 정보는 보안을 위해
-                <br />
-                로그인한 사용자에게만 공개됩니다.
-                <br />
-                우측 상단 버튼을 통해 로그인 해주세요.
-              </p>
-
-              <div className="mt-8 flex items-center gap-3 opacity-30">
-                <Calendar className="text-primary h-5 w-5" />
-                <div className="bg-muted h-5 w-48 rounded-full" />
+            <div className="mb-6 opacity-20">
+              <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                <div className="bg-primary h-full w-1/2 rounded-full" />
               </div>
             </div>
-          </div>
-        </div>
+
+            <div className="flex gap-3 border-t pt-6 opacity-30">
+              <div className="bg-primary h-10 flex-1 rounded-md" />
+              <div className="border-border h-10 flex-1 rounded-md border" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );
 }
 
+// ── 로딩 스켈레톤 ─────────────────────────────────────────────────────────────
+
 function ProjectSkeleton() {
   return (
-    <section className="py-12">
-      {/* 헤더 스켈레톤 */}
-      <div className="mb-4 flex flex-col items-center text-center">
-        <Skeleton className="h-12 w-64 rounded-full" />
-        <Skeleton className="mt-6 h-1 w-20 rounded-full" />
+    <section className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-6 w-36 rounded-md" />
+        <Skeleton className="h-5 w-8 rounded-full" />
       </div>
 
-      <div className="mx-auto max-w-4xl px-4">
-        <div className="bg-card flex flex-col overflow-hidden rounded-2xl md:flex-row">
-          {/* 왼쪽 영역 스켈레톤 (1/4) */}
-          <div className="bg-primary/10 flex w-full flex-col gap-8 p-10 md:w-1/4">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-12" />
-              <Skeleton className="h-8 w-20" />
-            </div>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-12" />
-              <Skeleton className="h-8 w-24" />
-            </div>
-          </div>
-
-          {/* 오른쪽 영역 스켈레톤 (3/4) */}
-          <div className="flex w-full flex-col justify-center p-10 md:w-3/4">
-            <div className="mb-4 flex items-center gap-3">
-              <Skeleton className="h-px w-8" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-            <Skeleton className="mb-6 h-10 w-3/4" />
-            <div className="mb-8 flex items-center gap-4">
-              <Skeleton className="h-6 w-40" />
-              <Skeleton className="h-8 w-16 rounded-full" />
-            </div>
-            <div className="flex gap-2">
-              <Skeleton className="h-12 w-32 rounded-md" />
-              <Skeleton className="h-12 w-32 rounded-md" />
-            </div>
-          </div>
-        </div>
+      <div>
+        <ProjectCardSkeleton />
       </div>
     </section>
   );

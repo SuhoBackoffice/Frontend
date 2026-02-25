@@ -6,20 +6,20 @@ import { createProjectStraightAction, CreateStraightsFormState } from '@/lib/act
 import { getNormalStraightType, getLoopStraightType } from '@/lib/api/straight/straight.api';
 import { StraightTypeResponse } from '@/types/straight/straight.types';
 import { toast } from 'sonner';
-import { PlusCircle, Trash2, Loader2, ChevronsUpDown, Check } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, ChevronsUpDown, Check, Ruler } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -52,6 +52,9 @@ const createNewRow = (): StraightRow => ({
   isLoopRail: false,
 });
 
+// 공통 그리드 컬럼 정의: [번호 | 길이 | 타입 | 수량 | 루프레일 | 삭제]
+const GRID_COLS = 'grid-cols-[2rem_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,0.8fr)_6.5rem_2.25rem]';
+
 interface Props {
   projectId: number;
 }
@@ -69,37 +72,25 @@ export default function StraightRegisterComponent({ projectId }: Props) {
   const [loopTypes, setLoopTypes] = useState<StraightTypeResponse[]>([]);
   const [openComboboxIndex, setOpenComboboxIndex] = useState<number | null>(null);
 
-  // 일반 레일 타입 조회
   useEffect(() => {
     const fetchNormalType = async () => {
       try {
-        const normalRes = await getNormalStraightType();
-        setNormalTypes(normalRes.data!);
-        if (normalRes.message) toast.success(normalRes.message);
+        const res = await getNormalStraightType();
+        setNormalTypes(res.data!);
       } catch (err) {
-        if (err instanceof ApiError) {
-          toast.error(err.message);
-        } else {
-          toast.error('일반 레일 타입 조회 실패. 서버 상태가 좋지 않습니다.');
-        }
+        toast.error(err instanceof ApiError ? err.message : '일반 레일 타입 조회 실패.');
       }
     };
     fetchNormalType();
   }, []);
 
-  // 루프 레일 타입 조회
   useEffect(() => {
     const fetchLoopType = async () => {
       try {
-        const loopRes = await getLoopStraightType();
-        setLoopTypes(loopRes.data!);
-        if (loopRes.message) toast.success(loopRes.message);
+        const res = await getLoopStraightType();
+        setLoopTypes(res.data!);
       } catch (err) {
-        if (err instanceof ApiError) {
-          toast.error(err.message);
-        } else {
-          toast.error('루프 레일 타입 조회 실패. 서버 상태가 좋지 않습니다.');
-        }
+        toast.error(err instanceof ApiError ? err.message : '루프 레일 타입 조회 실패.');
       }
     };
     fetchLoopType();
@@ -112,12 +103,10 @@ export default function StraightRegisterComponent({ projectId }: Props) {
   ) => {
     const newRows = [...rows];
     newRows[index][field] = value as never;
-
     if (field === 'isLoopRail') {
-      const newTypeList = value ? loopTypes : normalTypes;
-      newRows[index].straightTypeId = newTypeList[0]?.id || 0;
+      const list = value ? loopTypes : normalTypes;
+      newRows[index].straightTypeId = list[0]?.id || 0;
     }
-
     setRows(newRows);
   };
 
@@ -133,175 +122,225 @@ export default function StraightRegisterComponent({ projectId }: Props) {
   }, [state.success, state.message, router, projectId]);
 
   return (
-    <div className="container mx-auto max-w-4xl py-8">
-      <form action={formAction}>
-        <Card>
-          <CardHeader>
-            <CardTitle>신규 직선 레일 등록</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {state.message && !state.success && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertTitle>오류</AlertTitle>
-                <AlertDescription>{state.message}</AlertDescription>
-              </Alert>
-            )}
+    <form action={formAction}>
+      <Card className="w-full">
+        {/* ── 헤더 ── */}
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+              <Ruler className="text-primary h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold tracking-tight">
+                직선 레일 일괄 등록
+              </CardTitle>
+              <CardDescription className="mt-0.5">
+                레일 항목을 추가하고 길이·타입·수량을 입력한 뒤 한 번에 등록하세요.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
 
-            {/* 서버 액션으로 전달할 페이로드 */}
-            <input type="hidden" name="straightsData" value={JSON.stringify(rows)} />
+        <CardContent className="space-y-3">
+          {state.message && !state.success && (
+            <Alert variant="destructive">
+              <AlertTitle>오류</AlertTitle>
+              <AlertDescription>{state.message}</AlertDescription>
+            </Alert>
+          )}
 
-            <Table className="border text-sm">
-              <TableHeader>
-                <TableRow className="divide-x">
-                  <TableHead>길이 (mm)</TableHead>
-                  <TableHead>타입</TableHead>
-                  <TableHead>수량</TableHead>
-                  <TableHead>루프레일</TableHead>
-                  <TableHead className="w-[50px]">삭제</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row, index) => {
-                  const typeOptions = row.isLoopRail ? loopTypes : normalTypes;
-                  const selectedType = typeOptions.find((t) => t.id === row.straightTypeId);
-                  const rowErrors = state.errors?.[index];
+          <input type="hidden" name="straightsData" value={JSON.stringify(rows)} />
 
-                  return (
-                    <TableRow key={row.id} className="divide-x">
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={row.length}
-                          placeholder="예: 3600"
-                          onChange={(e) =>
-                            handleRowChange(
-                              index,
-                              'length',
-                              e.target.value === '' ? '' : Number(e.target.value)
-                            )
-                          }
-                          className={cn('h-9', rowErrors?.length && 'border-destructive')}
-                        />
-                        {rowErrors?.length && (
-                          <p className="text-destructive mt-1 text-xs">{rowErrors.length}</p>
-                        )}
-                      </TableCell>
+          {/* 컬럼 헤더 */}
+          <div className={cn('grid items-center gap-2 px-3', GRID_COLS)}>
+            <div />
+            <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              길이 (mm)
+            </span>
+            <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              타입
+            </span>
+            <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              수량
+            </span>
+            <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              레일 타입
+            </span>
+            <div />
+          </div>
 
-                      <TableCell>
-                        <Popover
-                          open={openComboboxIndex === index}
-                          onOpenChange={(isOpen) => setOpenComboboxIndex(isOpen ? index : null)}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn(
-                                'h-9 w-full justify-between font-normal',
-                                rowErrors?.straightTypeId && 'border-destructive'
-                              )}
-                            >
-                              {selectedType ? selectedType.type : '타입 선택...'}
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                            <Command>
-                              <CommandInput placeholder="타입 검색..." />
-                              <CommandList>
-                                <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                                <CommandGroup>
-                                  {typeOptions.map((type) => (
-                                    <CommandItem
-                                      key={type.id}
-                                      value={type.type}
-                                      onSelect={() => {
-                                        handleRowChange(index, 'straightTypeId', type.id);
-                                        setOpenComboboxIndex(null);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          'mr-2 h-4 w-4',
-                                          row.straightTypeId === type.id
-                                            ? 'opacity-100'
-                                            : 'opacity-0'
-                                        )}
-                                      />
-                                      {type.type}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        {rowErrors?.straightTypeId && (
-                          <p className="text-destructive mt-1 text-xs">
-                            {rowErrors.straightTypeId}
-                          </p>
-                        )}
-                      </TableCell>
+          {/* 항목 목록 */}
+          <div className="space-y-1.5">
+            {rows.map((row, index) => {
+              const typeOptions = row.isLoopRail ? loopTypes : normalTypes;
+              const selectedType = typeOptions.find((t) => t.id === row.straightTypeId);
+              const rowErrors = state.errors?.[index];
+              const hasError = !!(
+                rowErrors?.length ||
+                rowErrors?.straightTypeId ||
+                rowErrors?.totalQuantity
+              );
 
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={row.totalQuantity}
-                          placeholder="예: 10"
-                          onChange={(e) =>
-                            handleRowChange(
-                              index,
-                              'totalQuantity',
-                              e.target.value === '' ? '' : Number(e.target.value)
-                            )
-                          }
-                          className={cn('h-9', rowErrors?.totalQuantity && 'border-destructive')}
-                        />
-                        {rowErrors?.totalQuantity && (
-                          <p className="text-destructive mt-1 text-xs">{rowErrors.totalQuantity}</p>
-                        )}
-                      </TableCell>
+              return (
+                <div
+                  key={row.id}
+                  className={cn(
+                    'grid items-start gap-2 rounded-lg border p-3 transition-colors',
+                    GRID_COLS,
+                    hasError
+                      ? 'border-destructive/40 bg-destructive/5'
+                      : 'bg-muted/30 border-transparent'
+                  )}
+                >
+                  {/* 번호 */}
+                  <div className="flex h-9 items-center justify-center">
+                    <span className="text-muted-foreground text-sm tabular-nums">{index + 1}</span>
+                  </div>
 
-                      <TableCell className="text-center">
-                        <Checkbox
-                          checked={row.isLoopRail}
-                          onCheckedChange={(checked) =>
-                            handleRowChange(index, 'isLoopRail', Boolean(checked))
-                          }
-                        />
-                      </TableCell>
+                  {/* 길이 */}
+                  <div className="space-y-1">
+                    <Input
+                      type="number"
+                      value={row.length}
+                      placeholder="3600"
+                      onChange={(e) =>
+                        handleRowChange(
+                          index,
+                          'length',
+                          e.target.value === '' ? '' : Number(e.target.value)
+                        )
+                      }
+                      className={cn('h-9', rowErrors?.length && 'border-destructive')}
+                    />
+                    {rowErrors?.length && (
+                      <p className="text-destructive text-xs">{rowErrors.length}</p>
+                    )}
+                  </div>
 
-                      <TableCell className="text-center">
+                  {/* 타입 */}
+                  <div className="space-y-1">
+                    <Popover
+                      open={openComboboxIndex === index}
+                      onOpenChange={(isOpen) => setOpenComboboxIndex(isOpen ? index : null)}
+                    >
+                      <PopoverTrigger asChild>
                         <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="h-9 w-9"
-                          onClick={() => removeRow(row.id)}
-                          disabled={rows.length <= 1}
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            'bg-background h-9 w-full justify-between font-normal',
+                            rowErrors?.straightTypeId && 'border-destructive'
+                          )}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <span className="truncate">
+                            {selectedType ? selectedType.type : '타입 선택...'}
+                          </span>
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-52 p-0">
+                        <Command>
+                          <CommandInput placeholder="타입 검색..." />
+                          <CommandList>
+                            <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                            <CommandGroup>
+                              {typeOptions.map((type) => (
+                                <CommandItem
+                                  key={type.id}
+                                  value={type.type}
+                                  onSelect={() => {
+                                    handleRowChange(index, 'straightTypeId', type.id);
+                                    setOpenComboboxIndex(null);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      row.straightTypeId === type.id ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                  />
+                                  {type.type}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {rowErrors?.straightTypeId && (
+                      <p className="text-destructive text-xs">{rowErrors.straightTypeId}</p>
+                    )}
+                  </div>
 
-            <Button type="button" variant="outline" size="sm" className="mt-4" onClick={addRow}>
-              <PlusCircle className="mr-2 h-4 w-4" /> 행 추가
-            </Button>
-          </CardContent>
+                  {/* 수량 */}
+                  <div className="space-y-1">
+                    <Input
+                      type="number"
+                      value={row.totalQuantity}
+                      placeholder="10"
+                      onChange={(e) =>
+                        handleRowChange(
+                          index,
+                          'totalQuantity',
+                          e.target.value === '' ? '' : Number(e.target.value)
+                        )
+                      }
+                      className={cn('h-9', rowErrors?.totalQuantity && 'border-destructive')}
+                    />
+                    {rowErrors?.totalQuantity && (
+                      <p className="text-destructive text-xs">{rowErrors.totalQuantity}</p>
+                    )}
+                  </div>
 
-          <CardFooter>
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              등록하기
-            </Button>
-          </CardFooter>
-        </Card>
-      </form>
-    </div>
+                  {/* 루프 레일 */}
+                  <div className="flex h-9 flex-col items-center justify-center gap-1">
+                    <Switch
+                      id={`loop-${row.id}`}
+                      checked={row.isLoopRail}
+                      onCheckedChange={(checked) =>
+                        handleRowChange(index, 'isLoopRail', Boolean(checked))
+                      }
+                    />
+                    <Label
+                      htmlFor={`loop-${row.id}`}
+                      className="text-muted-foreground cursor-pointer text-xs font-normal select-none"
+                    >
+                      {row.isLoopRail ? '루프' : '일반'}
+                    </Label>
+                  </div>
+
+                  {/* 삭제 */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive h-9 w-9"
+                    onClick={() => removeRow(row.id)}
+                    disabled={rows.length <= 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 항목 추가 */}
+          <Button type="button" variant="outline" size="sm" onClick={addRow} className="gap-1.5">
+            <PlusCircle className="h-4 w-4" />
+            항목 추가
+          </Button>
+        </CardContent>
+
+        {/* ── 푸터 ── */}
+        <CardFooter className="flex items-center justify-between border-t pt-6">
+          <span className="text-muted-foreground text-sm">총 {rows.length}개 항목</span>
+          <Button type="submit" disabled={isPending} size="lg" className="min-w-44">
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {rows.length}개 레일 등록하기
+          </Button>
+        </CardFooter>
+      </Card>
+    </form>
   );
 }

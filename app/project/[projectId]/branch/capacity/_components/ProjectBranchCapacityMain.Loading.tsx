@@ -1,45 +1,62 @@
-// ProjectBranchCapacityMain.Loading.tsx
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-function SkeletonCard() {
+function SkeletonRow() {
   return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-6 w-3/4" />
-        <Skeleton className="mt-1 h-4 w-1/2" />
-      </CardHeader>
-      <CardContent className="grid grid-cols-1 items-center gap-6 md:grid-cols-2">
-        {/* 왼쪽: 이미지 스켈레톤 */}
-        <Skeleton className="aspect-square w-full rounded-md" />
+    <div className="flex items-center gap-4 rounded-lg border bg-card px-4 py-3.5">
+      {/* 이미지 */}
+      <Skeleton className="h-14 w-14 shrink-0 rounded-md" />
 
-        {/* 오른쪽: 차트 및 정보 스켈레톤 */}
-        <div className="flex w-full flex-col items-center">
-          <Skeleton className="h-48 w-48 rounded-full" />
-          <div className="mt-4 w-full space-y-4 text-center">
-            <div>
-              <Skeleton className="mx-auto mb-1 h-4 w-1/2" />
-              <Skeleton className="mx-auto h-8 w-3/4" />
-            </div>
-            <div>
-              <Skeleton className="mx-auto mb-1 h-4 w-1/2" />
-              <Skeleton className="mx-auto h-6 w-full" />
-            </div>
-          </div>
+      {/* 시리얼 + 이름 + 범례 + 바 */}
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <Skeleton className="h-5 w-14 rounded-full" />
+        <Skeleton className="h-4 w-48" />
+        {/* 범례 스켈레톤 */}
+        <div className="flex gap-3">
+          <Skeleton className="h-3 w-10" />
+          <Skeleton className="h-3 w-10" />
         </div>
-      </CardContent>
-      <CardFooter>
-        <Skeleton className="h-10 w-full" />
-      </CardFooter>
-    </Card>
+        {/* 바 스켈레톤 */}
+        <Skeleton className="h-2.5 w-full rounded-full" />
+      </div>
+
+      {/* 생산 가능 강조 박스 */}
+      <div className="shrink-0 rounded-xl bg-muted/40 px-5 py-3 text-center">
+        <Skeleton className="mx-auto mb-1 h-3 w-20" />
+        <Skeleton className="mx-auto h-9 w-12" />
+        <Skeleton className="mx-auto mt-0.5 h-3 w-4" />
+      </div>
+
+      {/* 화살표 */}
+      <Skeleton className="size-4 shrink-0 rounded" />
+    </div>
   );
 }
 
 export default function ProjectBranchCapacityMainLoading() {
   return (
-    <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8">
-      <SkeletonCard />
-      <SkeletonCard />
+    <div className="flex flex-col gap-4">
+      {/* Card 1 스켈레톤 */}
+      <Card className="gap-0 py-0">
+        <CardContent className="flex items-center justify-between gap-3 px-5 py-4">
+          <Skeleton className="h-5 w-40" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-44 rounded-md" />
+            <Skeleton className="h-8 w-24 rounded-md" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Card 2 스켈레톤 */}
+      <Card className="gap-0 py-0">
+        <CardContent className="px-5 py-4">
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

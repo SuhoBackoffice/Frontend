@@ -23,17 +23,24 @@ import {
   FileText,
   FileStack,
   Menu,
+  FileSpreadsheet,
+  Loader2,
+  WarehouseIcon,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { getProjectQuantityList } from '@/lib/api/project/project.api';
+import { ApiError } from '@/types/api.types';
+import { toast } from 'sonner';
 
 const normalize = (p?: string | null) =>
   !p ? '' : p !== '/' && p.endsWith('/') ? p.slice(0, -1) : p;
 
 interface NavChildItem {
   label: string;
-  href: string;
+  href?: string;
   icon: LucideIcon;
   disabled?: boolean;
+  action?: 'download-quantity';
 }
 
 interface NavSection {
@@ -55,9 +62,48 @@ function NavContent({
   const rawPath = usePathname();
   const pathname = normalize(rawPath);
   const base = `/project/${projectId}`;
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadQuantityList = async () => {
+    setIsDownloading(true);
+    try {
+      const fileResponse = await getProjectQuantityList(projectId);
+      const { blob, headers } = fileResponse;
+      const contentDisposition = headers.get('content-disposition');
+      let filename = `물량리스트_${projectId}.xlsx`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (filenameMatch && filenameMatch.length > 1) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        }
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : '물량 리스트 다운로드 실패. 서버 상태가 좋지 않습니다.';
+      toast.error(message);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const nav: NavSection[] = [
-    { label: '개요', href: `${base}`, icon: LayoutDashboard },
+    {
+      label: '개요',
+      href: `${base}`,
+      icon: LayoutDashboard,
+      children: [{ label: '물량 리스트', icon: FileSpreadsheet, action: 'download-quantity' }],
+    },
     {
       label: '업무 보고',
       icon: FileStack,
@@ -83,7 +129,6 @@ function NavContent({
           label: '직선 레일',
           href: `${base}/straight/capacity`,
           icon: ClipboardList,
-          disabled: true,
         },
       ],
     },
@@ -94,6 +139,7 @@ function NavContent({
       children: [
         { label: '자재 입고 등록', href: `${base}/material/register`, icon: PackagePlus },
         { label: '자재 입고 이력', href: `${base}/material/history`, icon: ChartColumnBig },
+        { label: '자재 현황', href: `${base}/material/stock`, icon: WarehouseIcon },
       ],
     },
   ];
@@ -157,6 +203,26 @@ function NavContent({
             {!isCollapsed && section.children && section.children.length > 0 && (
               <ul className="animate-in fade-in zoom-in-95 mt-2 space-y-1 border-l pl-4">
                 {section.children.map((child) => {
+                  if (child.action === 'download-quantity') {
+                    return (
+                      <li key={child.label}>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start rounded-md px-2 py-1 text-sm transition-colors"
+                          onClick={handleDownloadQuantityList}
+                          disabled={isDownloading}
+                        >
+                          {isDownloading ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <child.icon className="mr-2 h-4 w-4" />
+                          )}
+                          <span className="whitespace-nowrap">{child.label}</span>
+                        </Button>
+                      </li>
+                    );
+                  }
+
                   const childActive = isActiveExact(child.href);
                   return (
                     <li key={child.label}>
@@ -204,7 +270,7 @@ export function ProjectSidenav({ projectId }: { projectId: number }) {
   return (
     <nav
       className={cn(
-        'bg-card relative hidden h-full flex-col rounded-xl border p-3 shadow-sm transition-all duration-300 ease-in-out lg:flex',
+        'bg-card relative hidden flex-col rounded-xl border p-5 pb-10 shadow-sm transition-all duration-300 ease-in-out lg:flex',
         isCollapsed ? 'w-[70px]' : 'w-[240px]'
       )}
     >

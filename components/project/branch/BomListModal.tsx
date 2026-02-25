@@ -74,8 +74,10 @@ export default function BomListModal<T>({
     [headers, keys]
   );
 
+  const fallbackData = useMemo(() => [], []);
+
   const table = useReactTable({
-    data: data || [],
+    data: data || fallbackData,
     columns,
     state: {
       sorting,

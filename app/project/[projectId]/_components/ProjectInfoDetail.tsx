@@ -1,13 +1,12 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getProjectQuantityList } from '@/lib/api/project/project.api';
-import { ApiError, ApiResponse, FileResponse } from '@/types/api.types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { ApiResponse } from '@/types/api.types';
 import { ProjecInfoDetailResponse } from '@/types/project/project.types';
-import { Download, Loader2 } from 'lucide-react';
-import { use, useState } from 'react';
-import { toast } from 'sonner';
+import { FolderKanban, Tag, MapPin, CalendarDays, CalendarCheck2 } from 'lucide-react';
+import { use } from 'react';
 
 interface ProjectDetailProps {
   promiseData: Promise<ApiResponse<ProjecInfoDetailResponse>>;
@@ -16,80 +15,61 @@ interface ProjectDetailProps {
 
 export default function ProjectInfoDetail({ promiseData, projectId }: ProjectDetailProps) {
   const data = use(promiseData).data!;
-  const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownloadClick = async () => {
-    setIsDownloading(true);
-    try {
-      const fileResponse: FileResponse = await getProjectQuantityList(projectId);
-
-      const { blob, headers } = fileResponse;
-      const contentDisposition = headers.get('content-disposition');
-      let filename = `${data.name}.xlsx`;
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
-        if (filenameMatch && filenameMatch.length > 1) {
-          filename = decodeURIComponent(filenameMatch[1]);
-        }
-      }
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-    } catch (err) {
-      const message =
-        err instanceof ApiError
-          ? err.message
-          : '물량 리스트 다운로드 실패. 서버 상태가 좋지 않습니다.';
-      toast.error(message);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+  const stats = [
+    { icon: Tag, label: '버전', value: data.version },
+    { icon: MapPin, label: '지역', value: data.region },
+    { icon: CalendarDays, label: '시작일', value: data.startDate },
+    { icon: CalendarCheck2, label: '종료일', value: data.endDate },
+  ];
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl">프로젝트 명 : [{data.name}]</CardTitle>
-          <Button onClick={handleDownloadClick} disabled={isDownloading} className="w-[150px]">
-            {isDownloading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" />
-                물량 리스트
-              </>
-            )}
-          </Button>
+    <Card className="overflow-hidden border shadow-sm">
+      {/* 헤더 */}
+      <div className="px-6 pt-2">
+        <div className="flex items-start gap-4">
+          {/* 아이콘 */}
+          <div className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+            <FolderKanban className="text-foreground h-6 w-6" />
+          </div>
+
+          {/* 텍스트 */}
+          <div className="min-w-0">
+            <div className="mb-2 flex items-center gap-2">
+              <Badge variant="secondary" className="px-2 py-0.5 text-[11px] font-semibold">
+                PROJECT OVERVIEW
+              </Badge>
+              <span className="text-muted-foreground text-xs">#{projectId}</span>
+            </div>
+
+            <h1 className="text-foreground truncate text-2xl font-bold tracking-tight">
+              {data.name}
+            </h1>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-lg font-medium">버전</p>
-            <p className="text-2xl font-semibold">{data.version}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-lg font-medium">지역</p>
-            <p className="text-2xl font-semibold">{data.region}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-lg font-medium">시작일</p>
-            <p className="text-2xl font-semibold">{data.startDate}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-lg font-medium">종료일</p>
-            <p className="text-2xl font-semibold">{data.endDate}</p>
-          </div>
+      </div>
+
+      {/* 통계 섹션 */}
+      <CardContent className="p-0">
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          {stats.map(({ icon: Icon, label, value }, index) => (
+            <div
+              key={label}
+              className="group hover:bg-muted/40 relative flex flex-col items-center gap-2 px-5 py-4 text-center transition-colors"
+            >
+              {/* 세로 구분선 (마지막 제외) */}
+              {index < stats.length - 1 && (
+                <div className="bg-border absolute top-3 right-0 hidden h-[calc(100%-24px)] w-px border-1 md:block" />
+              )}
+              <div className="flex items-center gap-1.5">
+                <Icon className="text-muted-foreground h-3.5 w-3.5" />
+                <span className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
+                  {label}
+                </span>
+              </div>
+              <span className="text-foreground text-base leading-none font-semibold">{value}</span>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
