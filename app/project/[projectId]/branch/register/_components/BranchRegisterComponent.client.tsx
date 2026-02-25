@@ -1,82 +1,79 @@
 'use client';
 
-import { getProjectDetail } from '@/lib/api/project/project.api';
-import { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getProjectDetail, postProjectBranchRegister } from '@/lib/api/project/project.api';
+import { getBranchBomList } from '@/lib/api/branch/branch.api';
+import { BranchDetailInfoBom } from '@/types/branch/branch.types';
 import { ProjecInfoDetailResponse } from '@/types/project/project.types';
 import { toast } from 'sonner';
-import { getBranchLatestBomList, uploadBranchBom } from '@/lib/api/branch/branch.api';
-import { BranchDetailInfoBom } from '@/types/branch/branch.types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { postProjectBranchRegister } from '@/lib/api/project/project.api';
-import { useRouter } from 'next/navigation';
-import BomListModal from '@/components/project/branch/BomListModal';
 import { ApiError } from '@/types/api.types';
-import { Separator } from '@/components/ui/separator';
-import {
-  RefreshCw,
-  CloudUpload,
-  FileSpreadsheet,
-  Loader2,
-  CheckCircle2,
-  RotateCcw,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import { deleteUploadedFile, postFileUpload } from '@/lib/api/file/file.api';
-import { FileUploadType } from '@/types/file/file.types';
+import {
+  PlusCircle,
+  Trash2,
+  Loader2,
+  GitBranch,
+  FileSpreadsheet,
+  ImageIcon,
+  CheckCircle2,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import BomListModal from '@/components/project/branch/BomListModal';
+import BranchRegisterWizardModal, { WizardResult } from './BranchRegisterWizardModal';
+
+interface BranchListItem {
+  id: string;
+  branchCode: string;
+  quantity: number;
+  branchTypeId: number;
+  imageUrl: string | null;
+  bomData: BranchDetailInfoBom[] | null;
+  bomSource: 'latest' | 'uploaded';
+}
 
 interface Props {
   projectId: number;
 }
 
-// 양의 정수만 허용하는 헬퍼
-function toPositiveIntOrEmpty(v: string) {
-  if (v === '') return '';
-  const n = Number(v);
-  if (!Number.isFinite(n) || n <= 0) return '';
-  return String(Math.floor(n));
-}
+// 공통 그리드 컬럼 정의: [번호 | 분기코드 | 수량 | BOM출처 | 이미지 | BOM확인 | 삭제]
+const GRID_COLS =
+  'grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,0.8fr)_minmax(0,1fr)_4.5rem_4.5rem_2.25rem]';
+
+const BOM_HEADERS = ['품목 구분', '도번', '품명', '규격', '단위 수량', '단위', '사급'];
+const BOM_KEYS = [
+  'itemType',
+  'drawingNumber',
+  'itemName',
+  'specification',
+  'unitQuantity',
+  'unit',
+  'suppliedMaterial',
+] as const;
 
 export default function BranchRegisterComponent({ projectId }: Props) {
   const router = useRouter();
 
-  // State management
-  const [projectDetailData, setProjectDetailData] = useState<ProjecInfoDetailResponse>();
-  const [branchCode, setBranchCode] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [bomData, setBomData] = useState<BranchDetailInfoBom[] | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isBomUploaded, setIsBomUploaded] = useState(false);
-  const [latestBranchTypeId, setLatestBranchTypeId] = useState<number | null>(null);
-  const [imageUploading, setImageUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const imageInputRef = useRef<HTMLInputElement | null>(null);
-  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
-
-  // 로딩 상태 분리
+  const [projectDetailData, setProjectDetailData] = useState<ProjecInfoDetailResponse | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
-  const [loadingLatest, setLoadingLatest] = useState(false);
-  const [uploadingBom, setUploadingBom] = useState(false);
+  const [items, setItems] = useState<BranchListItem[]>([]);
   const [registering, setRegistering] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
-  // 파일 input 제어 (동일 파일 재선택 가능하도록)
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Data for the BOM list modal
-  const bomHeaders = ['품목 구분', '도번', '품명', '규격', '단위 수량', '단위', '사급'];
-  const bomKeys = [
-    'itemType',
-    'drawingNumber',
-    'itemName',
-    'specification',
-    'unitQuantity',
-    'unit',
-    'suppliedMaterial',
-  ];
+  const [bomPreview, setBomPreview] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    data: BranchDetailInfoBom[] | null;
+  }>({ isOpen: false, title: '', description: '', data: null });
 
   useEffect(() => {
     const fetchProjectDetail = async () => {
@@ -84,7 +81,6 @@ export default function BranchRegisterComponent({ projectId }: Props) {
         setLoadingProject(true);
         const response = await getProjectDetail({ projectId });
         setProjectDetailData(response.data!);
-        toast.success(response.message);
       } catch (err) {
         const message =
           err instanceof ApiError
@@ -98,484 +94,260 @@ export default function BranchRegisterComponent({ projectId }: Props) {
     fetchProjectDetail();
   }, [projectId]);
 
-  const handleGetLatestBom = async () => {
-    if (!projectDetailData || !branchCode || !quantity) {
-      toast.error('분기 레일 코드와 수량을 모두 입력해주세요.');
-      return;
-    }
-
-    try {
-      setLoadingLatest(true);
-      const response = await getBranchLatestBomList({
-        branchCode,
-        versionInfoId: String(projectDetailData.versionInfoId),
-      });
-
-      setBomData(response.data!.branchDetailinfoDtoList);
-      setLatestBranchTypeId(response.data!.branchTypeId);
-      toast.success('최신 BOM 리스트를 성공적으로 불러왔습니다.');
-    } catch (err) {
-      const message =
-        err instanceof ApiError
-          ? err.message
-          : '최신 BOM 정보 조회 실패. 서버 상태가 좋지 않습니다.';
-      toast.error(message);
-      setBomData(null);
-      setLatestBranchTypeId(null);
-    } finally {
-      setLoadingLatest(false);
-    }
+  const handleWizardComplete = (result: WizardResult) => {
+    const newItem: BranchListItem = {
+      id: crypto.randomUUID(),
+      branchCode: result.branchCode,
+      quantity: result.quantity,
+      branchTypeId: result.branchTypeId,
+      imageUrl: result.imageUrl,
+      bomData: result.bomData,
+      bomSource: result.bomSource,
+    };
+    setItems((prev) => [...prev, newItem]);
+    setWizardOpen(false);
+    toast.success(`${result.branchCode} 항목이 추가되었습니다.`);
   };
 
-  const ALLOWED_EXTS = ['.xls', '.xlsx'] as const;
-  const ALLOWED_MIME = new Set([
-    'application/vnd.ms-excel', // .xls
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-  ]);
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
 
-  function isExcelFile(file: File) {
-    const nameOk = ALLOWED_EXTS.some((ext) => file.name.toLowerCase().endsWith(ext));
-    const typeOk = !file.type || ALLOWED_MIME.has(file.type);
-    return nameOk && typeOk;
-  }
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      toast.error('파일을 선택해주세요.');
-      return;
-    }
-
-    if (!projectDetailData || !branchCode || !quantity) {
-      toast.error('분기 레일 코드와 수량 입력 후 파일을 업로드해주세요.');
-      return;
-    }
-
-    if (!isExcelFile(file)) {
-      toast.error('엑셀 파일(.xls, .xlsx)만 업로드할 수 있습니다.');
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
-
-    try {
-      setUploadingBom(true);
-      const response = await uploadBranchBom({
-        branchCode,
-        versionInfoId: projectDetailData.versionInfoId,
-        file,
-        imageUrl,
+  const handleOpenBomPreview = async (item: BranchListItem) => {
+    if (item.bomData) {
+      setBomPreview({
+        isOpen: true,
+        title: `${item.branchCode} BOM 목록`,
+        description: `${item.branchCode} 분기 레일의 자재 목록입니다.`,
+        data: item.bomData,
       });
-      setIsBomUploaded(true);
-      setBomData(null);
-      setLatestBranchTypeId(response.data!.branchTypeId);
-      toast.success('새로운 BOM이 성공적으로 업로드되었습니다.');
+      return;
+    }
+
+    const tid = toast.loading(`${item.branchCode} BOM 불러오는 중...`);
+    try {
+      const response = await getBranchBomList({ branchTypeId: item.branchTypeId });
+      const data = response.data!;
+      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, bomData: data } : i)));
+      setBomPreview({
+        isOpen: true,
+        title: `${item.branchCode} BOM 목록`,
+        description: `${item.branchCode} 분기 레일의 자재 목록입니다.`,
+        data,
+      });
+      toast.dismiss(tid);
     } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : '파일 업로드 실패. 서버 상태가 좋지 않습니다.';
-      toast.error(message);
-      setBomData(null);
-      setLatestBranchTypeId(null);
-    } finally {
-      setUploadingBom(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      const message = err instanceof ApiError ? err.message : 'BOM 조회 실패.';
+      toast.error(message, { id: tid });
     }
   };
 
   const handleRegister = async () => {
-    if (!latestBranchTypeId || !quantity) {
-      toast.error('최신 BOM을 불러오거나 새로운 BOM을 업로드한 후 등록해주세요.');
+    if (items.length === 0) {
+      toast.error('등록할 분기 레일 항목이 없습니다.');
       return;
     }
-
     try {
       setRegistering(true);
-      const data = [
-        {
-          branchTypeId: latestBranchTypeId,
-          quantity: Number(quantity),
-        },
-      ];
+      const data = items.map((item) => ({
+        branchTypeId: item.branchTypeId,
+        quantity: item.quantity,
+      }));
       const response = await postProjectBranchRegister(data, projectId);
       toast.success(response.message);
       router.push(`/project/${projectId}`);
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : '분기 등록 실패. 서버 상태가 좋지 않습니다.';
+        err instanceof ApiError ? err.message : '등록 실패. 서버 상태가 좋지 않습니다.';
       toast.error(message);
     } finally {
       setRegistering(false);
     }
   };
 
-  const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
-  const MAX_IMAGE_SIZE = 100 * 1024 * 1024;
-
-  function isImageFile(file: File) {
-    const typeOk = !file.type || ALLOWED_IMAGE_MIME.has(file.type);
-    const sizeOk = file.size <= MAX_IMAGE_SIZE;
-    return typeOk && sizeOk;
-  }
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      toast.error('이미지 파일을 선택해주세요.');
-      return;
-    }
-    if (!isImageFile(file)) {
-      toast.error('JPG/PNG/WebP 형식, 100MB 이하만 업로드할 수 있습니다.');
-      if (imageInputRef.current) imageInputRef.current.value = '';
-      return;
-    }
-
-    try {
-      setImageUploading(true);
-      const res = await postFileUpload({
-        file,
-        type: FileUploadType.BRANCH_IMAGE,
-      });
-      setImageUrl(res.data!.fileUrl);
-      toast.success('이미지 업로드 완료');
-    } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : '이미지 업로드 실패. 서버 상태가 좋지 않습니다.';
-      toast.error(message);
-      setImageUrl(null);
-    } finally {
-      setImageUploading(false);
-    }
-  };
-
-  const clearImage = async () => {
-    if (!imageUrl) {
-      toast.error('이미지 정보가 없습니다.');
-      setIsImagePreviewOpen(false);
-      if (imageInputRef.current) imageInputRef.current.value = '';
-      return;
-    }
-
-    try {
-      const response = await deleteUploadedFile({ fileUrl: imageUrl });
-      toast.success(response.message);
-      setIsImagePreviewOpen(false);
-      setImageUrl(null);
-      if (imageInputRef.current) imageInputRef.current.value = '';
-    } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : '이미지 삭제 실패. 서버 상태가 좋지 않습니다.';
-      toast.error(message);
-    }
-  };
-
-  const isFormFilled = branchCode.trim() !== '' && quantity.trim() !== '';
-  const resetStateForNewEntry = () => {
-    setBranchCode('');
-    setQuantity('');
-    setBomData(null);
-    setIsBomUploaded(false);
-    setLatestBranchTypeId(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
   return (
     <>
-      <div className="flex justify-center p-8">
-        <Card className="w-full max-w-[1440px]">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold">신규 분기 레일 등록</CardTitle>
-            <CardDescription className="text-lg">
-              {projectDetailData?.name} 프로젝트에 분기 레일을 등록합니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-8">
-            <div className="flex justify-center">
-              <div className="flex items-center gap-4">
-                <span className="text-lg text-gray-500">버전:</span>
-                <span className="text-xl font-semibold">{projectDetailData?.version}</span>
-              </div>
+      <Card className="w-full">
+        {/* ── 헤더 ── */}
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+              <GitBranch className="text-primary h-5 w-5" />
             </div>
-
-            {/* Step 1: Input for branch code and quantity */}
-            <section aria-labelledby="section-step1" className="space-y-4">
-              <div className="grid w-full items-center gap-2">
-                <Label htmlFor="branchCode" className="text-base">
-                  분기 레일 코드
-                </Label>
-                <Input
-                  id="branchCode"
-                  type="text"
-                  placeholder="분기 레일 코드를 입력하세요."
-                  value={branchCode}
-                  onChange={(e) => {
-                    setBranchCode(e.target.value);
-                    setLatestBranchTypeId(null);
-                    setBomData(null);
-                  }}
-                  disabled={loadingProject || loadingLatest || uploadingBom}
-                  className="h-10 text-base"
-                />
-              </div>
-
-              <div className="grid w-full items-center gap-2">
-                <Label htmlFor="quantity" className="text-base">
-                  수량
-                </Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  min={1}
-                  step={1}
-                  placeholder="수량을 입력하세요."
-                  value={quantity}
-                  onChange={(e) => {
-                    const val = toPositiveIntOrEmpty(e.target.value);
-                    setQuantity(val);
-                    setLatestBranchTypeId(null);
-                    setBomData(null);
-                  }}
-                  disabled={loadingProject || loadingLatest || uploadingBom}
-                  className="h-10 text-base"
-                />
-              </div>
-            </section>
-
-            {/* Step 2: Render BOM options */}
-            {isFormFilled && (
-              <>
-                <Separator className="bg-border/80 my-6 h-[2px]" />
-                <section aria-labelledby="section-bom">
-                  <Card className="w-full max-w-[1440px]">
-                    <CardHeader>
-                      <CardTitle id="section-bom" className="text-xl">
-                        자재 리스트 업데이트
-                      </CardTitle>
-                      <CardDescription>
-                        분기레일의 자재 목록을 등록해주세요. 2가지 방법 중 하나를 택해 주세요.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* 최신 BOM 적용 */}
-                        <div
-                          className={cn(
-                            'bg-muted/30 space-y-4 rounded-xl border p-4 transition-colors md:p-6',
-                            bomData && 'ring-primary/40 bg-primary/5 ring-1'
-                          )}
-                        >
-                          <p className="text-center text-lg font-bold">최근 등록한 BOM 적용하기</p>
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={handleGetLatestBom}
-                              disabled={loadingLatest || uploadingBom}
-                              className="h-12 flex-grow text-base"
-                              aria-label="최신 BOM 불러오기"
-                            >
-                              {loadingLatest ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  불러오는 중...
-                                </>
-                              ) : (
-                                <>
-                                  <RefreshCw className="mr-2 h-4 w-4" />
-                                  최신 버전 BOM 불러오기
-                                </>
-                              )}
-                            </Button>
-
-                            <Button
-                              onClick={() => setIsModalOpen(true)}
-                              variant="outline"
-                              className="h-12 w-12 flex-shrink-0 p-0 text-base"
-                              disabled={!bomData}
-                              aria-label="BOM 리스트 보기"
-                            >
-                              <FileSpreadsheet className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* 새 BOM 업로드 */}
-                        <div
-                          className={cn(
-                            'bg-muted/30 space-y-4 rounded-xl border p-4 transition-colors md:p-6',
-                            isBomUploaded && 'ring-primary/40 bg-primary/5 ring-1'
-                          )}
-                        >
-                          <p className="text-center text-lg font-bold">신규 BOM 등록하기</p>
-
-                          {/* ✅ 이미지 업로드: 버튼만 풀사이즈(내부 카드 제거) */}
-                          {imageUrl ? (
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  type="button"
-                                  variant="default"
-                                  className="h-12 min-w-0 flex-1 text-base"
-                                  onClick={() => setIsImagePreviewOpen(true)}
-                                  disabled={imageUploading || uploadingBom || loadingLatest}
-                                >
-                                  미리보기
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  className="h-12 w-16 shrink-0"
-                                  onClick={clearImage}
-                                  disabled={imageUploading || uploadingBom || loadingLatest}
-                                >
-                                  제거
-                                </Button>
-                              </div>
-
-                              {/* 미리보기 다이얼로그 */}
-                              <Dialog
-                                open={isImagePreviewOpen}
-                                onOpenChange={setIsImagePreviewOpen}
-                              >
-                                <DialogContent className="sm:max-w-[560px]">
-                                  <DialogHeader>
-                                    <DialogTitle>분기 이미지 미리보기</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="mx-auto w-full">
-                                    <div className="relative mx-auto aspect-square w-full max-w-[480px] overflow-hidden rounded-lg border">
-                                      <Image
-                                        src={imageUrl!}
-                                        alt={`${branchCode} 분기 이미지 미리보기`}
-                                        fill
-                                        sizes="(max-width: 640px) 480px, 480px"
-                                        className="object-cover"
-                                        priority={false}
-                                      />
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                            </div>
-                          ) : (
-                            <div className="space-y-3">
-                              <label htmlFor="branch-image-upload" className="w-full">
-                                <Button
-                                  asChild
-                                  variant="default"
-                                  className="h-12 w-full cursor-pointer text-base"
-                                  disabled={imageUploading || uploadingBom || loadingLatest}
-                                >
-                                  <span className="inline-flex items-center justify-center gap-2">
-                                    {imageUploading ? (
-                                      <>
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                        이미지 업로드 중...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <CloudUpload className="h-4 w-4" />
-                                        분기 이미지 업로드(선택)
-                                      </>
-                                    )}
-                                  </span>
-                                </Button>
-                                <input
-                                  ref={imageInputRef}
-                                  id="branch-image-upload"
-                                  type="file"
-                                  accept="image/jpeg,image/png,image/webp"
-                                  className="hidden"
-                                  onChange={handleImageUpload}
-                                  disabled={imageUploading || uploadingBom || loadingLatest}
-                                />
-                              </label>
-                            </div>
-                          )}
-
-                          {/* BOM 엑셀 업로드 (동일 사이즈) */}
-                          <label htmlFor="file-upload" className="w-full">
-                            <Button
-                              asChild
-                              variant="default"
-                              className="h-12 w-full cursor-pointer text-base"
-                              disabled={uploadingBom || loadingLatest}
-                              aria-label="새로운 BOM 업로드"
-                            >
-                              <span className="inline-flex items-center justify-center gap-2">
-                                {uploadingBom ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    업로드 중...
-                                  </>
-                                ) : (
-                                  <>
-                                    <CloudUpload className="h-4 w-4" />
-                                    새로운 BOM 업로드
-                                  </>
-                                )}
-                              </span>
-                            </Button>
-                            <input
-                              ref={fileInputRef}
-                              id="file-upload"
-                              type="file"
-                              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                              className="hidden"
-                              onChange={handleFileUpload}
-                              disabled={uploadingBom || loadingLatest}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </section>
-                <Separator className="bg-border/80 my-6 h-[2px]" />
-              </>
-            )}
-
-            {/* Step 3: 등록 버튼 */}
-            {latestBranchTypeId && (
-              <section aria-labelledby="section-register" className="space-y-4">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <Button
-                    onClick={handleRegister}
-                    disabled={registering || loadingLatest || uploadingBom}
-                    className="h-12 w-full text-lg font-bold"
-                    aria-label="분기 레일 등록하기"
-                  >
-                    {registering ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        등록 중...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="mr-2 h-5 w-5" />
-                        등록하기
-                      </>
+            <div>
+              <CardTitle className="text-2xl font-bold tracking-tight">분기 레일 일괄 등록</CardTitle>
+              <CardDescription className="mt-0.5">
+                {loadingProject ? (
+                  <span className="text-muted-foreground">프로젝트 정보 불러오는 중...</span>
+                ) : (
+                  <>
+                    {projectDetailData?.name} 프로젝트에 분기 레일을 등록합니다.
+                    {projectDetailData?.version && (
+                      <span className="ml-2 text-xs">(버전: {projectDetailData.version})</span>
                     )}
-                  </Button>
+                  </>
+                )}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
 
+        <CardContent className="space-y-3">
+          {/* 컬럼 헤더 */}
+          {items.length > 0 && (
+            <div className={cn('grid items-center gap-2 px-3', GRID_COLS)}>
+              <div />
+              <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                분기 코드
+              </span>
+              <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                수량
+              </span>
+              <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                BOM 출처
+              </span>
+              <span className="text-muted-foreground text-center text-xs font-semibold tracking-wider uppercase">
+                이미지
+              </span>
+              <span className="text-muted-foreground text-center text-xs font-semibold tracking-wider uppercase">
+                BOM
+              </span>
+              <div />
+            </div>
+          )}
+
+          {/* 항목 목록 */}
+          <div className="space-y-1.5">
+            {items.map((item, index) => (
+              <div
+                key={item.id}
+                className={cn(
+                  'bg-muted/30 grid items-center gap-2 rounded-lg border border-transparent p-3 transition-colors',
+                  GRID_COLS
+                )}
+              >
+                {/* 번호 */}
+                <div className="flex h-9 items-center justify-center">
+                  <span className="text-muted-foreground text-sm tabular-nums">{index + 1}</span>
+                </div>
+
+                {/* 분기 코드 */}
+                <div className="flex h-9 items-center">
+                  <span className="truncate text-sm font-medium">{item.branchCode}</span>
+                </div>
+
+                {/* 수량 */}
+                <div className="flex h-9 items-center">
+                  <span className="text-sm tabular-nums">{item.quantity.toLocaleString()}</span>
+                </div>
+
+                {/* BOM 출처 */}
+                <div className="flex h-9 items-center gap-1.5">
+                  <CheckCircle2 className="text-primary h-3.5 w-3.5 shrink-0" />
+                  <span className="text-muted-foreground truncate text-xs">
+                    {item.bomSource === 'latest' ? '최신 BOM 적용' : '신규 BOM 등록'}
+                  </span>
+                </div>
+
+                {/* 이미지 */}
+                <div className="flex h-9 items-center justify-center">
+                  {item.imageUrl ? (
+                    <CheckCircle2 className="text-primary h-4 w-4" />
+                  ) : (
+                    <ImageIcon className="text-muted-foreground/40 h-4 w-4" />
+                  )}
+                </div>
+
+                {/* BOM 확인 */}
+                <div className="flex h-9 items-center justify-center">
                   <Button
-                    onClick={resetStateForNewEntry}
-                    variant="destructive"
-                    className="h-12 w-full text-lg font-bold"
-                    aria-label="처음부터 다시 시작"
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-primary h-9 w-9"
+                    onClick={() => handleOpenBomPreview(item)}
+                    title="BOM 목록 보기"
                   >
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    처음부터
+                    <FileSpreadsheet className="h-4 w-4" />
                   </Button>
                 </div>
-              </section>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+
+                {/* 삭제 */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground hover:text-destructive h-9 w-9"
+                  onClick={() => removeItem(item.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          {/* 빈 상태 */}
+          {items.length === 0 && (
+            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
+              <GitBranch className="text-muted-foreground/40 mb-3 h-10 w-10" />
+              <p className="text-muted-foreground text-sm font-medium">
+                등록된 분기 레일이 없습니다.
+              </p>
+              <p className="text-muted-foreground/60 mt-1 text-xs">
+                아래 버튼으로 항목을 추가해주세요.
+              </p>
+            </div>
+          )}
+
+          {/* 항목 추가 */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setWizardOpen(true)}
+            disabled={loadingProject || !projectDetailData}
+            className="gap-1.5"
+          >
+            <PlusCircle className="h-4 w-4" />
+            항목 추가
+          </Button>
+        </CardContent>
+
+        {/* ── 푸터 ── */}
+        <CardFooter className="flex items-center justify-between border-t pt-6">
+          <span className="text-muted-foreground text-sm">총 {items.length}개 항목</span>
+          <Button
+            type="button"
+            onClick={handleRegister}
+            disabled={items.length === 0 || registering || loadingProject}
+            size="lg"
+            className="min-w-44"
+          >
+            {registering && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {items.length}개 레일 등록하기
+          </Button>
+        </CardFooter>
+      </Card>
+
+      {/* 마법사 모달 */}
+      {projectDetailData && (
+        <BranchRegisterWizardModal
+          open={wizardOpen}
+          onClose={() => setWizardOpen(false)}
+          versionInfoId={projectDetailData.versionInfoId}
+          onComplete={handleWizardComplete}
+        />
+      )}
+
+      {/* BOM 미리보기 */}
       <BomListModal<BranchDetailInfoBom>
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        data={bomData || []}
-        headers={bomHeaders}
-        keys={bomKeys as (keyof BranchDetailInfoBom)[]}
-        title={`${branchCode}번 분기 BOM List`}
-        description={`${branchCode}번 분기에 대한 자재 목록입니다.`}
+        isOpen={bomPreview.isOpen}
+        onClose={() => setBomPreview((prev) => ({ ...prev, isOpen: false }))}
+        data={bomPreview.data}
+        headers={BOM_HEADERS}
+        keys={BOM_KEYS as unknown as (keyof BranchDetailInfoBom)[]}
+        title={bomPreview.title}
+        description={bomPreview.description}
       />
     </>
   );
